@@ -1,0 +1,94 @@
+[package]
+name = "superinstance"
+version = "0.1.0"
+edition = "2021"
+authors = ["SuperInstance Ranch"]
+description = "A Ranch Ecosystem that evolves into a SuperInstance - specialized intelligences managed by a loyal Border Collie"
+license = "MIT"
+readme = "README.md"
+keywords = ["ai", "edge", "lora", "jetson", "agents"]
+categories = ["science", "asynchronous"]
+
+[dependencies]
+# Async Runtime
+tokio = { version = "1.35", features = ["full", "rt-multi-thread", "sync", "time", "fs", "io-util", "macros", "signal"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+futures = "0.3"
+async-trait = "0.1"
+
+# Terminal UI
+ratatui = "0.26"
+crossterm = { version = "0.27", features = ["event-stream"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# Database (Stud Book)
+rusqlite = { version = "0.30", features = ["bundled"] }
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Error Handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Random for breeding
+rand = "0.8"
+rand_chacha = "0.3"
+
+# Async channels
+flume = "0.11"
+
+# Memory management
+parking_lot = { version = "0.12", features = ["serde"] }
+
+# Configuration
+config = "0.14"
+
+# CPU/Thread priority (for Hogs)
+thread-priority = "0.16"
+
+# GPU/Tensor (optional, for real inference)
+# candle-core = { version = "0.3", optional = true }
+# candle-transformers = { version = "0.3", optional = true }
+# candle-nn = { version = "0.3", optional = true }
+
+# Safe tensors for LoRA
+safetensors = "0.4"
+ndarray = "0.15"
+
+# Metrics
+metrics = "0.21"
+metrics-exporter-prometheus = { version = "0.12", optional = true }
+
+# HTTP client (for Ducks)
+reqwest = { version = "0.11", features = ["json", "rustls-tls"] }
+
+# System info
+sysinfo = "0.30"
+
+[features]
+default = []
+gpu = []
+tensorrt = []
+prometheus = ["metrics-exporter-prometheus"]
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.dev]
+opt-level = 1
+
+[[bin]]
+name = "superinstance"
+path = "src/main.rs"
