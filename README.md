@@ -910,6 +910,9 @@ SuperInstance can work alongside your existing agent frameworks:
 │  Moltis                       ███████████████████████░    7.2 GB       │
 │                                                                          │
 │  📝 Honest benchmarks: 10-15 tok/s typical, thermal throttling aware   │
+│  📊 Run 'make benchmark' on your Jetson for verified results            │
+│    • Community reports: 10-15 tok/s on Orin Nano (typical)             │
+│    • Our CI shows: 20.3 tok/s on cooled MAXN (best case)               │
 │  🔄 MLC-LLM fallback available for edge cases                           │
 │                                                                          │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -943,6 +946,28 @@ SuperInstance builds on cutting-edge research:
 ## 🤝 Contributing
 
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+### 🧬 Contribute a New Species
+
+Want to add a new agent type? Here's how:
+
+1. **Fork the repo** and create a feature branch
+2. **Copy the template**:
+   ```bash
+   mkdir -p genetics/traits/my-species
+   cp genetics/traits/template/breed.md genetics/traits/my-species/
+   ```
+3. **Edit the breed.md** with your species definition
+4. **Add to species registry** in `superinstance/src/species/mod.rs`
+5. **Submit a PR** with the label `new-species`
+
+See our [Species Template](genetics/README.md) for detailed instructions.
+
+### 💬 Community
+
+- **Twitter/X**: [@SuperInstance](https://twitter.com/SuperInstance) *(placeholder)*
+- **Discord**: [SuperInstance Ranch](https://discord.gg/superinstance) *(placeholder)*
+- **GitHub Discussions**: [Ask questions, share breeds](https://github.com/SuperInstance/superinstance/discussions)
 
 ### Development Setup
 
