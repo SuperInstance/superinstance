@@ -10,17 +10,22 @@ mod species;
 mod pasture;
 mod evolution;
 mod dashboard;
+mod web;  // Axum + Dioxus web dashboard
+mod genetics;
+mod channels;
 
 use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Result;
 use tokio::signal;
+use tokio::sync::broadcast;
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 
 use crate::ranch::Ranch;
 use crate::dashboard::Dashboard;
+use crate::web::{WebConfig, start_server};
 
 /// Hardware constraints for Jetson Orin Nano 8GB
 pub const MAX_VRAM_GB: f64 = 6.5;
@@ -114,10 +119,25 @@ async fn main() -> Result<()> {
         }
     });
     
+    // Create shutdown channel
+    let (shutdown_tx, shutdown_rx) = broadcast::channel::<()>(1);
+    
+    // Start the Web Dashboard (Axum + Dioxus)
+    info!("Starting Web Dashboard on :3000...");
+    let web_config = WebConfig::default();
+    let ranch_clone = Arc::clone(&ranch);
+    let shutdown_rx_web = shutdown_tx.subscribe();
+    tokio::spawn(async move {
+        if let Err(e) = start_server(web_config, ranch_clone, shutdown_rx_web).await {
+            tracing::error!("Web server error: {}", e);
+        }
+    });
+    
     info!("\n✓ Ranch is open for business!");
     info!("  The Cowboy (User) may now set intent.");
     info!("  The Collie is watching and anticipating.");
-    info!("  The Livestock are grazing in the pasture.\n");
+    info!("  The Livestock are grazing in the pasture.");
+    info!("  Web Dashboard: http://localhost:3000\n");
     
     // Launch the Terminal Dashboard
     info!("Launching the Living Ranch Dashboard...");
@@ -131,6 +151,7 @@ async fn main() -> Result<()> {
             }
         }
         _ = signal::ctrl_c() => {
+            let _ = shutdown_tx.send(());
             info!("\nReceived shutdown signal. Closing the Ranch...");
         }
     }

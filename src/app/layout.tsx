@@ -14,24 +14,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Z.ai Code Scaffold - AI-Powered Development",
-  description: "Modern Next.js scaffold optimized for AI-powered development with Z.ai. Built with TypeScript, Tailwind CSS, and shadcn/ui.",
-  keywords: ["Z.ai", "Next.js", "TypeScript", "Tailwind CSS", "shadcn/ui", "AI development", "React"],
-  authors: [{ name: "Z.ai Team" }],
+  title: "SuperInstance Ranch - Self-Evolving AI Ecosystem",
+  description: "Don't rent an AI brain. Breed a Ranch that evolves forever. Self-evolving AI agents for Jetson Orin Nano 8GB with Night School breeding, Open Genomics, and CRDT memory.",
+  keywords: ["SuperInstance", "AI Ranch", "Jetson Orin Nano", "TensorRT-LLM", "Self-Evolving AI", "Local AI", "LoRA", "Border Collie", "Open Genomics", "breed.md"],
+  authors: [{ name: "SuperInstance Team" }],
   icons: {
-    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+    icon: "/logo.svg",
   },
   openGraph: {
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
-    url: "https://chat.z.ai",
-    siteName: "Z.ai",
+    title: "SuperInstance Ranch - Self-Evolving AI Ecosystem",
+    description: "Don't rent an AI brain. Breed a Ranch that evolves forever.",
+    url: "https://superinstance.ai",
+    siteName: "SuperInstance",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
+    title: "SuperInstance Ranch",
+    description: "Don't rent an AI brain. Breed a Ranch that evolves forever.",
   },
 };
 

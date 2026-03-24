@@ -1,0 +1,28 @@
+# Breeding Screenshot Placeholder
+
+This file is a placeholder for the actual breeding.gif.
+
+## To Generate
+
+1. Run Night School:
+   ```bash
+   make night-school
+   ```
+
+2. Record the output showing:
+   - Species evaluation
+   - Fitness scores
+   - LoRA weight merging (SLERP/TIES)
+   - Offspring creation
+
+## Expected Content
+
+The GIF should show:
+- Geometric constraint solver working
+- Species being evaluated with fitness scores
+- LoRA adapters being merged
+- New offspring being created and tested
+
+## Text Alternative
+
+See the README's Night School section for ASCII art that explains the process.

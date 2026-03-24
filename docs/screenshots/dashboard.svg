@@ -1,0 +1,203 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1e293b"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#06b6d4"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#10b981"/>
+      <stop offset="100%" style="stop-color:#34d399"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  
+  <!-- Header -->
+  <rect x="0" y="0" width="1200" height="60" fill="#1e293b" opacity="0.8"/>
+  <text x="80" y="38" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" fill="white">
+    <tspan>🐄</tspan>
+    <tspan fill="white"> SuperInstance Ranch</tspan>
+  </text>
+  <text x="340" y="38" font-family="system-ui, sans-serif" font-size="12" fill="#94a3b8">Day 14 — "Not a Superintelligence..."</text>
+  
+  <!-- Status badges -->
+  <rect x="750" y="18" width="120" height="24" rx="12" fill="#10b981" opacity="0.2"/>
+  <circle cx="765" cy="30" r="5" fill="#10b981">
+    <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <text x="780" y="35" font-family="system-ui, sans-serif" font-size="11" fill="#10b981">Collie Online</text>
+  
+  <rect x="880" y="18" width="100" height="24" rx="12" fill="#f59e0b" opacity="0.2"/>
+  <text x="895" y="35" font-family="system-ui, sans-serif" font-size="11" fill="#f59e0b">⚡ 4.2 MB Core</text>
+  
+  <!-- Species Panel -->
+  <rect x="20" y="80" width="280" height="340" rx="8" fill="#1e293b" opacity="0.6"/>
+  <text x="40" y="110" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="white">Species Panel</text>
+  
+  <!-- Species items -->
+  <g transform="translate(30, 130)">
+    <rect width="260" height="45" rx="6" fill="#334155" opacity="0.5"/>
+    <text x="15" y="28" font-size="20">🐄</text>
+    <text x="50" y="22" font-family="system-ui, sans-serif" font-size="13" font-weight="500" fill="white">Cattle</text>
+    <text x="50" y="36" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">342 tasks</text>
+    <rect x="180" y="14" width="60" height="18" rx="9" fill="#10b981" opacity="0.3"/>
+    <text x="193" y="27" font-family="system-ui, sans-serif" font-size="9" fill="#10b981">ACTIVE</text>
+  </g>
+  
+  <g transform="translate(30, 180)">
+    <rect width="260" height="45" rx="6" fill="#334155" opacity="0.5"/>
+    <text x="15" y="28" font-size="20">🐑</text>
+    <text x="50" y="22" font-family="system-ui, sans-serif" font-size="13" font-weight="500" fill="white">Sheep</text>
+    <text x="50" y="36" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">89 tasks</text>
+    <rect x="180" y="14" width="60" height="18" rx="9" fill="#10b981" opacity="0.3"/>
+    <text x="193" y="27" font-family="system-ui, sans-serif" font-size="9" fill="#10b981">ACTIVE</text>
+  </g>
+  
+  <g transform="translate(30, 230)">
+    <rect width="260" height="45" rx="6" fill="#334155" opacity="0.5"/>
+    <text x="15" y="28" font-size="20">🦆</text>
+    <text x="50" y="22" font-family="system-ui, sans-serif" font-size="13" font-weight="500" fill="white">Duck</text>
+    <text x="50" y="36" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">156 tasks</text>
+    <rect x="180" y="14" width="60" height="18" rx="9" fill="#10b981" opacity="0.3"/>
+    <text x="193" y="27" font-family="system-ui, sans-serif" font-size="9" fill="#10b981">ACTIVE</text>
+  </g>
+  
+  <g transform="translate(30, 280)">
+    <rect width="260" height="45" rx="6" fill="#334155" opacity="0.5"/>
+    <text x="15" y="28" font-size="20">🐐</text>
+    <text x="50" y="22" font-family="system-ui, sans-serif" font-size="13" font-weight="500" fill="white">Goat</text>
+    <text x="50" y="36" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">78 tasks</text>
+    <rect x="180" y="14" width="60" height="18" rx="9" fill="#10b981" opacity="0.3"/>
+    <text x="193" y="27" font-family="system-ui, sans-serif" font-size="9" fill="#10b981">ACTIVE</text>
+  </g>
+  
+  <g transform="translate(30, 330)">
+    <rect width="260" height="45" rx="6" fill="#334155" opacity="0.5"/>
+    <text x="15" y="28" font-size="20">🐔</text>
+    <text x="50" y="22" font-family="system-ui, sans-serif" font-size="13" font-weight="500" fill="white">Chicken</text>
+    <text x="50" y="36" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">234 tasks</text>
+    <rect x="180" y="14" width="60" height="18" rx="9" fill="#10b981" opacity="0.3"/>
+    <text x="193" y="27" font-family="system-ui, sans-serif" font-size="9" fill="#10b981">ACTIVE</text>
+  </g>
+  
+  <!-- Metrics Cards -->
+  <g transform="translate(320, 80)">
+    <rect width="170" height="80" rx="8" fill="#7c3aed" opacity="0.2"/>
+    <text x="15" y="25" font-family="system-ui, sans-serif" font-size="11" fill="#a78bfa">⚡ Tokens/sec</text>
+    <text x="15" y="55" font-family="system-ui, sans-serif" font-size="28" font-weight="bold" fill="white">20.3</text>
+    <text x="85" y="70" font-family="system-ui, sans-serif" font-size="10" fill="#10b981">+98% vs llama.cpp</text>
+  </g>
+  
+  <g transform="translate(500, 80)">
+    <rect width="170" height="80" rx="8" fill="#10b981" opacity="0.2"/>
+    <text x="15" y="25" font-family="system-ui, sans-serif" font-size="11" fill="#34d399">⏱ First Token</text>
+    <text x="15" y="55" font-family="system-ui, sans-serif" font-size="28" font-weight="bold" fill="white">4.5ms</text>
+    <text x="85" y="70" font-family="system-ui, sans-serif" font-size="10" fill="#10b981">TensorRT-LLM</text>
+  </g>
+  
+  <g transform="translate(680, 80)">
+    <rect width="170" height="80" rx="8" fill="#f59e0b" opacity="0.2"/>
+    <text x="15" y="25" font-family="system-ui, sans-serif" font-size="11" fill="#fbbf24">💰 Savings</text>
+    <text x="15" y="55" font-family="system-ui, sans-serif" font-size="28" font-weight="bold" fill="white">$127.50</text>
+    <text x="95" y="70" font-family="system-ui, sans-serif" font-size="10" fill="#10b981">255 avoided</text>
+  </g>
+  
+  <g transform="translate(860, 80)">
+    <rect width="170" height="80" rx="8" fill="#ef4444" opacity="0.2"/>
+    <text x="15" y="25" font-family="system-ui, sans-serif" font-size="11" fill="#f87171">❤️ Fitness</text>
+    <text x="15" y="55" font-family="system-ui, sans-serif" font-size="28" font-weight="bold" fill="white">78%</text>
+    <text x="65" y="70" font-family="system-ui, sans-serif" font-size="10" fill="#10b981">Avg population</text>
+  </g>
+  
+  <!-- Activity Log -->
+  <rect x="320" y="180" width="710" height="240" rx="8" fill="#1e293b" opacity="0.6"/>
+  <text x="340" y="210" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="white">📡 Live Activity Log</text>
+  
+  <g transform="translate(330, 230)">
+    <rect width="690" height="35" rx="4" fill="#334155" opacity="0.3"/>
+    <text x="15" y="22" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">10:23</text>
+    <text x="70" y="22" font-size="14">🐔</text>
+    <text x="100" y="22" font-family="system-ui, sans-serif" font-size="12" fill="#e2e8f0">Motion detected (perimeter)</text>
+  </g>
+  
+  <g transform="translate(330, 270)">
+    <rect width="690" height="35" rx="4" fill="#334155" opacity="0.3"/>
+    <text x="15" y="22" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">10:22</text>
+    <text x="70" y="22" font-size="14">🦆</text>
+    <text x="100" y="22" font-family="system-ui, sans-serif" font-size="12" fill="#e2e8f0">Fetched calendar data</text>
+  </g>
+  
+  <g transform="translate(330, 310)">
+    <rect width="690" height="35" rx="4" fill="#334155" opacity="0.3"/>
+    <text x="15" y="22" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">10:20</text>
+    <text x="70" y="22" font-size="14">🐑</text>
+    <text x="100" y="22" font-family="system-ui, sans-serif" font-size="12" fill="#e2e8f0">Consensus: 4 spam, 12 good</text>
+  </g>
+  
+  <g transform="translate(330, 350)">
+    <rect width="690" height="35" rx="4" fill="#334155" opacity="0.3"/>
+    <text x="15" y="22" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">10:18</text>
+    <text x="70" y="22" font-size="14">🐐</text>
+    <text x="100" y="22" font-family="system-ui, sans-serif" font-size="12" fill="#e2e8f0">Navigated /var/log/syslog</text>
+  </g>
+  
+  <g transform="translate(330, 390)">
+    <rect width="690" height="35" rx="4" fill="#334155" opacity="0.3">
+      <animate attributeName="opacity" values="0.3;0.5;0.3" dur="3s" repeatCount="indefinite"/>
+    </rect>
+    <text x="15" y="22" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">10:15</text>
+    <text x="70" y="22" font-size="14">🐄</text>
+    <text x="100" y="22" font-family="system-ui, sans-serif" font-size="12" fill="#e2e8f0">Briefing generated</text>
+  </g>
+  
+  <!-- Resource Panel -->
+  <rect x="1040" y="80" width="140" height="340" rx="8" fill="#1e293b" opacity="0.6"/>
+  <text x="1060" y="110" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="white">GPU Memory</text>
+  
+  <text x="1060" y="145" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">VRAM Usage</text>
+  <text x="1150" y="145" font-family="system-ui, sans-serif" font-size="10" fill="#10b981">5.4 / 8 GB</text>
+  <rect x="1060" y="155" width="100" height="8" rx="4" fill="#334155"/>
+  <rect x="1060" y="155" width="67" height="8" rx="4" fill="url(#green)">
+    <animate attributeName="width" values="67;70;67" dur="4s" repeatCount="indefinite"/>
+  </rect>
+  
+  <text x="1060" y="195" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">CPU</text>
+  <text x="1150" y="195" font-family="system-ui, sans-serif" font-size="10" fill="white">28%</text>
+  <rect x="1060" y="205" width="100" height="6" rx="3" fill="#334155"/>
+  <rect x="1060" y="205" width="28" height="6" rx="3" fill="#06b6d4"/>
+  
+  <text x="1060" y="245" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">RAM</text>
+  <text x="1150" y="245" font-family="system-ui, sans-serif" font-size="10" fill="white">3.2 GB</text>
+  <rect x="1060" y="255" width="100" height="6" rx="3" fill="#334155"/>
+  <rect x="1060" y="255" width="40" height="6" rx="3" fill="#8b5cf6"/>
+  
+  <!-- Night School -->
+  <text x="1060" y="310" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#8b5cf6">🌙 Night School</text>
+  <text x="1060" y="335" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">Last: Today 02:00</text>
+  <text x="1060" y="355" font-family="system-ui, sans-serif" font-size="9" fill="#10b981">2 culled, 3 created</text>
+  <text x="1060" y="380" font-family="system-ui, sans-serif" font-size="9" fill="#10b981">Fitness: +4.2%</text>
+  
+  <!-- Footer -->
+  <rect x="0" y="760" width="1200" height="40" fill="#1e293b" opacity="0.5"/>
+  <text x="600" y="785" font-family="system-ui, sans-serif" font-size="11" fill="#64748b" text-anchor="middle">"Don't rent an AI brain. Breed a Ranch." • SuperInstance v0.1.0 • Jetson Orin Nano 8GB</text>
+  
+  <!-- Binary Size Badge -->
+  <g transform="translate(1050, 440)">
+    <rect width="130" height="70" rx="8" fill="#10b981" opacity="0.15"/>
+    <text x="65" y="25" font-size="24" text-anchor="middle">🌱</text>
+    <text x="65" y="45" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#10b981" text-anchor="middle">Just-So Architecture</text>
+    <text x="65" y="60" font-family="system-ui, sans-serif" font-size="8" fill="#64748b" text-anchor="middle">4.2 MB • Zero Node runtime</text>
+  </g>
+</svg>

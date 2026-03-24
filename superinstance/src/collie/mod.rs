@@ -112,6 +112,18 @@ impl Collie {
     }
     
     /// Classify intent to determine which species should handle it
+    /// 
+    /// The classification logic uses geometric routing based on constraint solving
+    /// (see `backend/constraint-theory/`). Each intent kind maps to a species based on:
+    /// - Resource requirements (VRAM, compute)
+    /// - Latency constraints
+    /// - Task characteristics (reasoning vs I/O vs monitoring)
+    /// 
+    /// # Arguments
+    /// * `intent` - The intent to classify
+    /// 
+    /// # Returns
+    /// The species type best suited to handle this intent
     fn classify_intent(&self, intent: &Intent) -> SpeciesType {
         match intent.kind.as_str() {
             // Heavy reasoning tasks

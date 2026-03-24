@@ -1,0 +1,263 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1e293b"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#06b6d4"/>
+      <stop offset="100%" style="stop-color:#22d3ee"/>
+    </linearGradient>
+    <linearGradient id="purple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#7c3aed"/>
+      <stop offset="100%" style="stop-color:#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#10b981"/>
+      <stop offset="100%" style="stop-color:#34d399"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  
+  <!-- Title -->
+  <text x="600" y="50" font-family="system-ui, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">🧠 Memory Pasture: CRDT + RAG</text>
+  <text x="600" y="80" font-family="system-ui, sans-serif" font-size="14" fill="#64748b" text-anchor="middle">Persistent memory across reboots • Distributed sync • 12ms RAG latency</text>
+  
+  <!-- Memory Architecture -->
+  <g transform="translate(50, 120)">
+    <!-- Input -->
+    <rect x="0" y="80" width="150" height="100" rx="8" fill="#7c3aed" opacity="0.3"/>
+    <text x="75" y="115" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="white" text-anchor="middle">📝 User Query</text>
+    <text x="75" y="140" font-family="system-ui, sans-serif" font-size="10" fill="#a78bfa" text-anchor="middle">"What did we</text>
+    <text x="75" y="155" font-family="system-ui, sans-serif" font-size="10" fill="#a78bfa" text-anchor="middle">discuss Monday?"</text>
+    
+    <!-- Arrow -->
+    <path d="M150 130 L200 130" stroke="#475569" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <polygon points="200,125 210,130 200,135" fill="#475569"/>
+    
+    <!-- Embedding -->
+    <rect x="210" y="80" width="150" height="100" rx="8" fill="#06b6d4" opacity="0.3"/>
+    <text x="285" y="110" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="white" text-anchor="middle">🔮 Embedding</text>
+    <text x="285" y="130" font-family="system-ui, sans-serif" font-size="9" fill="#22d3ee" text-anchor="middle">bge-small-en-v1.5</text>
+    <text x="285" y="150" font-family="system-ui, sans-serif" font-size="10" fill="#64748b" text-anchor="middle">384 dimensions</text>
+    <text x="285" y="165" font-family="system-ui, sans-serif" font-size="10" fill="#10b981" text-anchor="middle">3.2ms</text>
+    
+    <!-- Arrow -->
+    <path d="M360 130 L410 130" stroke="#475569" stroke-width="2"/>
+    <polygon points="410,125 420,130 410,135" fill="#475569"/>
+    
+    <!-- Vector Search -->
+    <rect x="420" y="60" width="180" height="140" rx="8" fill="#10b981" opacity="0.3"/>
+    <text x="510" y="90" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="white" text-anchor="middle">🔍 Vector Search</text>
+    <text x="510" y="110" font-family="system-ui, sans-serif" font-size="9" fill="#34d399" text-anchor="middle">lucineer (HNSW)</text>
+    
+    <!-- Vector visualization -->
+    <g transform="translate(440, 120)">
+      <circle cx="20" cy="20" r="8" fill="#22d3ee" opacity="0.5"/>
+      <circle cx="50" cy="35" r="6" fill="#a78bfa" opacity="0.5"/>
+      <circle cx="80" cy="15" r="7" fill="#34d399" opacity="0.5"/>
+      <circle cx="110" cy="40" r="5" fill="#fbbf24" opacity="0.5"/>
+      <circle cx="140" cy="25" r="8" fill="#f87171" opacity="0.5">
+        <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <line x1="20" y1="20" x2="140" y2="25" stroke="#10b981" stroke-width="1" stroke-dasharray="4"/>
+    </g>
+    
+    <text x="510" y="185" font-family="system-ui, sans-serif" font-size="10" fill="#10b981" text-anchor="middle">5.8ms • Top 3 results</text>
+    
+    <!-- Arrow -->
+    <path d="M600 130 L650 130" stroke="#475569" stroke-width="2"/>
+    <polygon points="650,125 660,130 650,135" fill="#475569"/>
+    
+    <!-- CRDT Merge -->
+    <rect x="660" y="60" width="180" height="140" rx="8" fill="#f59e0b" opacity="0.3"/>
+    <text x="750" y="90" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="white" text-anchor="middle">🔄 CRDT Merge</text>
+    <text x="750" y="110" font-family="system-ui, sans-serif" font-size="9" fill="#fbbf24" text-anchor="middle">smartcrdt</text>
+    
+    <!-- CRDT visualization -->
+    <g transform="translate(680, 120)">
+      <rect x="0" y="0" width="35" height="25" rx="4" fill="#22d3ee" opacity="0.5"/>
+      <text x="17" y="17" font-family="system-ui, sans-serif" font-size="8" fill="white" text-anchor="middle">A</text>
+      
+      <rect x="45" y="0" width="35" height="25" rx="4" fill="#a78bfa" opacity="0.5"/>
+      <text x="62" y="17" font-family="system-ui, sans-serif" font-size="8" fill="white" text-anchor="middle">B</text>
+      
+      <rect x="90" y="0" width="35" height="25" rx="4" fill="#34d399" opacity="0.5"/>
+      <text x="107" y="17" font-family="system-ui, sans-serif" font-size="8" fill="white" text-anchor="middle">C</text>
+      
+      <!-- Merge animation -->
+      <rect x="35" y="35" width="50" height="20" rx="4" fill="#fbbf24" opacity="0.8">
+        <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+      </rect>
+      <text x="60" y="49" font-family="system-ui, sans-serif" font-size="8" fill="white" text-anchor="middle">MERGE</text>
+    </g>
+    
+    <text x="750" y="185" font-family="system-ui, sans-serif" font-size="10" fill="#10b981" text-anchor="middle">Conflict-free • 1.2ms</text>
+    
+    <!-- Arrow -->
+    <path d="M840 130 L890 130" stroke="#475569" stroke-width="2"/>
+    <polygon points="890,125 900,130 890,135" fill="#475569"/>
+    
+    <!-- Output -->
+    <rect x="900" y="80" width="150" height="100" rx="8" fill="#ef4444" opacity="0.3"/>
+    <text x="975" y="115" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="white" text-anchor="middle">📤 Response</text>
+    <text x="975" y="140" font-family="system-ui, sans-serif" font-size="10" fill="#f87171" text-anchor="middle">"On Monday we</text>
+    <text x="975" y="155" font-family="system-ui, sans-serif" font-size="10" fill="#f87171" text-anchor="middle">discussed the API..."</text>
+  </g>
+  
+  <!-- Memory Stats -->
+  <g transform="translate(50, 340)">
+    <rect x="0" y="0" width="350" height="180" rx="12" fill="#1e293b" opacity="0.8"/>
+    <text x="175" y="30" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="white" text-anchor="middle">📊 Memory Stats</text>
+    
+    <g transform="translate(20, 50)">
+      <text x="0" y="15" font-family="system-ui, sans-serif" font-size="11" fill="#64748b">Total Memory:</text>
+      <text x="300" y="15" font-family="system-ui, sans-serif" font-size="14" fill="white" text-anchor="end">1.2 GB</text>
+      
+      <text x="0" y="40" font-family="system-ui, sans-serif" font-size="11" fill="#64748b">Embeddings:</text>
+      <text x="300" y="40" font-family="system-ui, sans-serif" font-size="14" fill="white" text-anchor="end">47,832</text>
+      
+      <text x="0" y="65" font-family="system-ui, sans-serif" font-size="11" fill="#64748b">Vector Dimensions:</text>
+      <text x="300" y="65" font-family="system-ui, sans-serif" font-size="14" fill="white" text-anchor="end">384</text>
+      
+      <text x="0" y="90" font-family="system-ui, sans-serif" font-size="11" fill="#64748b">HNSW M Parameter:</text>
+      <text x="300" y="90" font-family="system-ui, sans-serif" font-size="14" fill="white" text-anchor="end">16</text>
+      
+      <text x="0" y="115" font-family="system-ui, sans-serif" font-size="11" fill="#64748b">CRDT Replicas:</text>
+      <text x="300" y="115" font-family="system-ui, sans-serif" font-size="14" fill="white" text-anchor="end">3</text>
+    </g>
+  </g>
+  
+  <!-- Latency Breakdown -->
+  <g transform="translate(420, 340)">
+    <rect x="0" y="0" width="350" height="180" rx="12" fill="#1e293b" opacity="0.8"/>
+    <text x="175" y="30" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="white" text-anchor="middle">⏱ Latency Breakdown</text>
+    
+    <g transform="translate(20, 50)">
+      <text x="0" y="15" font-family="system-ui, sans-serif" font-size="10" fill="#a78bfa">Embedding</text>
+      <rect x="100" y="5" width="200" height="12" rx="6" fill="#334155"/>
+      <rect x="100" y="5" width="53" height="12" rx="6" fill="url(#purple)"/>
+      <text x="310" y="15" font-family="system-ui, sans-serif" font-size="10" fill="white">3.2ms</text>
+      
+      <text x="0" y="40" font-family="system-ui, sans-serif" font-size="10" fill="#22d3ee">Vector Search</text>
+      <rect x="100" y="30" width="200" height="12" rx="6" fill="#334155"/>
+      <rect x="100" y="30" width="97" height="12" rx="6" fill="url(#cyan)"/>
+      <text x="310" y="40" font-family="system-ui, sans-serif" font-size="10" fill="white">5.8ms</text>
+      
+      <text x="0" y="65" font-family="system-ui, sans-serif" font-size="10" fill="#fbbf24">CRDT Merge</text>
+      <rect x="100" y="55" width="200" height="12" rx="6" fill="#334155"/>
+      <rect x="100" y="55" width="20" height="12" rx="6" fill="#f59e0b"/>
+      <text x="310" y="65" font-family="system-ui, sans-serif" font-size="10" fill="white">1.2ms</text>
+      
+      <text x="0" y="90" font-family="system-ui, sans-serif" font-size="10" fill="#34d399">Context Build</text>
+      <rect x="100" y="80" width="200" height="12" rx="6" fill="#334155"/>
+      <rect x="100" y="80" width="30" height="12" rx="6" fill="url(#green)"/>
+      <text x="310" y="90" font-family="system-ui, sans-serif" font-size="10" fill="white">1.8ms</text>
+      
+      <text x="0" y="115" font-family="system-ui, sans-serif" font-size="10" fill="#f87171">TOTAL</text>
+      <rect x="100" y="105" width="200" height="12" rx="6" fill="#334155"/>
+      <rect x="100" y="105" width="200" height="12" rx="6" fill="#ef4444"/>
+      <text x="310" y="115" font-family="system-ui, sans-serif" font-size="10" font-weight="bold" fill="white">12ms</text>
+    </g>
+  </g>
+  
+  <!-- CRDT Visualization -->
+  <g transform="translate(790, 340)">
+    <rect x="0" y="0" width="360" height="180" rx="12" fill="#1e293b" opacity="0.8"/>
+    <text x="180" y="30" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="white" text-anchor="middle">🔄 CRDT Sync</text>
+    
+    <!-- Node visualization -->
+    <g transform="translate(30, 50)">
+      <!-- Node 1 (Jetson) -->
+      <rect x="0" y="0" width="80" height="60" rx="8" fill="#7c3aed" opacity="0.4"/>
+      <text x="40" y="20" font-family="system-ui, sans-serif" font-size="9" fill="white" text-anchor="middle">Jetson</text>
+      <text x="40" y="35" font-family="system-ui, sans-serif" font-size="8" fill="#a78bfa" text-anchor="middle">Primary</text>
+      <text x="40" y="50" font-family="system-ui, sans-serif" font-size="8" fill="#10b981" text-anchor="middle">● Online</text>
+      
+      <!-- Sync arrows -->
+      <path d="M80 30 L130 30" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4">
+        <animate attributeName="stroke-dashoffset" values="8;0" dur="1s" repeatCount="indefinite"/>
+      </path>
+      <path d="M130 40 L80 40" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4">
+        <animate attributeName="stroke-dashoffset" values="0;8" dur="1s" repeatCount="indefinite"/>
+      </path>
+      
+      <!-- Node 2 (Backup) -->
+      <rect x="130" y="0" width="80" height="60" rx="8" fill="#06b6d4" opacity="0.4"/>
+      <text x="170" y="20" font-family="system-ui, sans-serif" font-size="9" fill="white" text-anchor="middle">Laptop</text>
+      <text x="170" y="35" font-family="system-ui, sans-serif" font-size="8" fill="#22d3ee" text-anchor="middle">Replica</text>
+      <text x="170" y="50" font-family="system-ui, sans-serif" font-size="8" fill="#10b981" text-anchor="middle">● Synced</text>
+      
+      <!-- Sync arrows -->
+      <path d="M210 30 L260 30" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4">
+        <animate attributeName="stroke-dashoffset" values="8;0" dur="1s" repeatCount="indefinite"/>
+      </path>
+      <path d="M260 40 L210 40" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4">
+        <animate attributeName="stroke-dashoffset" values="0;8" dur="1s" repeatCount="indefinite"/>
+      </path>
+      
+      <!-- Node 3 (Cloud) -->
+      <rect x="260" y="0" width="80" height="60" rx="8" fill="#f59e0b" opacity="0.4"/>
+      <text x="300" y="20" font-family="system-ui, sans-serif" font-size="9" fill="white" text-anchor="middle">Cloud</text>
+      <text x="300" y="35" font-family="system-ui, sans-serif" font-size="8" fill="#fbbf24" text-anchor="middle">Optional</text>
+      <text x="300" y="50" font-family="system-ui, sans-serif" font-size="8" fill="#64748b" text-anchor="middle">○ Offline</text>
+    </g>
+    
+    <text x="180" y="145" font-family="system-ui, sans-serif" font-size="10" fill="#64748b" text-anchor="middle">Automatic conflict resolution • No coordination required</text>
+    <text x="180" y="165" font-family="system-ui, sans-serif" font-size="10" fill="#10b981" text-anchor="middle">Works offline • Syncs when connected</text>
+  </g>
+  
+  <!-- Memory Types -->
+  <g transform="translate(50, 550)">
+    <rect x="0" y="0" width="350" height="180" rx="12" fill="#1e293b" opacity="0.8"/>
+    <text x="175" y="30" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="white" text-anchor="middle">🗂 Memory Types</text>
+    
+    <g transform="translate(20, 50)">
+      <rect x="0" y="0" width="145" height="50" rx="6" fill="#7c3aed" opacity="0.3"/>
+      <text x="72" y="20" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="white" text-anchor="middle">Conversation</text>
+      <text x="72" y="38" font-family="system-ui, sans-serif" font-size="9" fill="#a78bfa" text-anchor="middle">User ↔ Agent</text>
+      
+      <rect x="155" y="0" width="145" height="50" rx="6" fill="#06b6d4" opacity="0.3"/>
+      <text x="227" y="20" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="white" text-anchor="middle">Episodic</text>
+      <text x="227" y="38" font-family="system-ui, sans-serif" font-size="9" fill="#22d3ee" text-anchor="middle">Time-stamped events</text>
+      
+      <rect x="0" y="60" width="145" height="50" rx="6" fill="#10b981" opacity="0.3"/>
+      <text x="72" y="80" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="white" text-anchor="middle">Semantic</text>
+      <text x="72" y="98" font-family="system-ui, sans-serif" font-size="9" fill="#34d399" text-anchor="middle">Facts & knowledge</text>
+      
+      <rect x="155" y="60" width="145" height="50" rx="6" fill="#f59e0b" opacity="0.3"/>
+      <text x="227" y="80" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="white" text-anchor="middle">Procedural</text>
+      <text x="227" y="98" font-family="system-ui, sans-serif" font-size="9" fill="#fbbf24" text-anchor="middle">How-to patterns</text>
+    </g>
+  </g>
+  
+  <!-- Integration -->
+  <g transform="translate(420, 550)">
+    <rect x="0" y="0" width="350" height="180" rx="12" fill="#1e293b" opacity="0.8"/>
+    <text x="175" y="30" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="white" text-anchor="middle">🔗 Integration</text>
+    
+    <g transform="translate(20, 50)">
+      <rect x="0" y="0" width="300" height="40" rx="6" fill="#334155" opacity="0.5"/>
+      <text x="150" y="25" font-family="system-ui, sans-serif" font-size="11" fill="white" text-anchor="middle">smartcrdt • CRDT implementation</text>
+      
+      <rect x="0" y="50" width="300" height="40" rx="6" fill="#334155" opacity="0.5"/>
+      <text x="150" y="75" font-family="system-ui, sans-serif" font-size="11" fill="white" text-anchor="middle">lucineer • Vector search (HNSW)</text>
+      
+      <rect x="0" y="100" width="300" height="40" rx="6" fill="#334155" opacity="0.5"/>
+      <text x="150" y="125" font-family="system-ui, sans-serif" font-size="11" fill="white" text-anchor="middle">bge-small-en-v1.5 • Embedding model</text>
+    </g>
+  </g>
+  
+  <!-- Footer -->
+  <rect x="0" y="760" width="1200" height="40" fill="#1e293b" opacity="0.5"/>
+  <text x="600" y="785" font-family="system-ui, sans-serif" font-size="11" fill="#64748b" text-anchor="middle">12ms RAG • CRDT Sync • Unlimited Memory • Zero Binary Growth</text>
+</svg>

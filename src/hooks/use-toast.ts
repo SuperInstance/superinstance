@@ -1,6 +1,17 @@
 "use client"
 
-// Inspired by react-hot-toast library
+/**
+ * Toast Hook - Global Toast Notification System
+ * 
+ * Provides a simple API for displaying toast notifications throughout the app.
+ * Based on react-hot-toast patterns but customized for shadcn/ui.
+ * 
+ * @example
+ * ```tsx
+ * const { toast } = useToast()
+ * toast({ title: "Success", description: "Operation completed" })
+ * ```
+ */
 import * as React from "react"
 
 import type {
@@ -8,8 +19,12 @@ import type {
   ToastProps,
 } from "@/components/ui/toast"
 
+/** Maximum number of toasts displayed simultaneously */
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+
+/** Delay in milliseconds before removing a dismissed toast */
+// NOTE: Was 1000000 (16+ minutes) - fixed to 10 seconds
+const TOAST_REMOVE_DELAY = 10000
 
 type ToasterToast = ToastProps & {
   id: string
@@ -174,6 +189,9 @@ function toast({ ...props }: Toast) {
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 
+  // Subscribe to toast state changes
+  // NOTE: Empty dependency array - we only want to subscribe once on mount
+  // Including 'state' would cause re-subscription on every state change
   React.useEffect(() => {
     listeners.push(setState)
     return () => {
@@ -182,7 +200,7 @@ function useToast() {
         listeners.splice(index, 1)
       }
     }
-  }, [state])
+  }, [])
 
   return {
     ...state,

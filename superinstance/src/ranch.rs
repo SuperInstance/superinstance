@@ -144,12 +144,30 @@ impl Ranch {
         
         loop {
             // Calculate time until 02:00
+            // SAFETY: We use safe datetime construction to avoid panics
             let now = chrono::Local::now();
-            let next_night_school = now.date_naive()
-                .and_hms_opt(NIGHT_SCHOOL_HOUR, 0, 0)
-                .unwrap()
-                .and_local_timezone(chrono::Local)
-                .unwrap();
+            
+            // Build next night school time safely
+            let next_night_school = match now.date_naive().and_hms_opt(NIGHT_SCHOOL_HOUR, 0, 0) {
+                Some(dt) => {
+                    // Convert to local timezone safely
+                    match dt.and_local_timezone(chrono::Local) {
+                        chrono::LocalResult::Single(local) => local,
+                        chrono::LocalResult::Ambiguous(local, _) => local,
+                        chrono::LocalResult::None => {
+                            // Fallback: use tomorrow at NIGHT_SCHOOL_HOUR
+                            warn!("Ambiguous time for night school, using fallback");
+                            continue;
+                        }
+                    }
+                }
+                None => {
+                    // Invalid time (e.g., 25:00:00), skip this iteration
+                    warn!("Invalid night school hour configuration");
+                    sleep(Duration::from_secs(3600)).await;
+                    continue;
+                }
+            };
             
             let next_run = if next_night_school > now {
                 next_night_school
@@ -227,6 +245,14 @@ impl Ranch {
 }
 
 /// Morning Routine demo - showcases the ecosystem working together
+/// 
+/// This is a demonstration function that shows how different species
+/// collaborate to complete a typical morning workflow:
+/// 1. Chicken monitors for motion/events
+/// 2. Sheep flock classifies and triages emails
+/// 3. Goat navigates and analyzes log files
+/// 4. Duck fetches external data (calendar)
+/// 5. Cattle synthesizes a morning briefing
 pub async fn morning_routine(ranch: &Ranch) -> Result<()> {
     use crate::species::{Cattle, Chicken, Duck, Goat, Sheep, SpeciesOps};
     

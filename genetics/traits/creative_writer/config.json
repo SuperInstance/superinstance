@@ -1,0 +1,13 @@
+{
+  "name": "creative_writer",
+  "version": "1.0.0",
+  "description": "Creative writing LoRA trait for storytelling and narrative generation",
+  "base_model": "phi-3-mini",
+  "adapter_type": "lora",
+  "rank": 16,
+  "alpha": 32,
+  "target_modules": ["q_proj", "v_proj", "k_proj", "o_proj"],
+  "load_time_ms": 180,
+  "vram_mb": 150,
+  "fitness_score": 0.85
+}

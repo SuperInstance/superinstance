@@ -1,0 +1,36 @@
+# Dashboard Screenshot Placeholder
+
+This file is a placeholder for the actual dashboard.gif.
+
+## To Generate
+
+1. Start the Ranch:
+   ```bash
+   make run
+   ```
+
+2. Open two terminals:
+   - Terminal 1: TUI dashboard (running)
+   - Terminal 2: Browser at http://localhost:3000
+
+3. Record with asciinema or similar tool:
+   ```bash
+   asciinema rec --overwrite dashboard.cast
+   ```
+
+4. Convert to GIF:
+   ```bash
+   agg dashboard.cast dashboard.gif
+   ```
+
+## Expected Content
+
+The GIF should show:
+- Left side: Terminal TUI with species list, activity log, resource gauges
+- Right side: Web dashboard mirroring the same data
+- Real-time updates as tasks are processed
+- The "Single Binary: 4.2 MB" indicator
+
+## Text Alternative
+
+If you cannot generate a GIF, the README uses ASCII art diagrams that convey the same information.

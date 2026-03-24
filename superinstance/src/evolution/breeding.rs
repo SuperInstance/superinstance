@@ -250,13 +250,19 @@ impl BreedingEngine {
     }
     
     /// TIES merge - TrIm, Elect, and Merge
+    /// 
+    /// TIES algorithm steps:
+    /// 1. Trim: Keep only top 20% weights by magnitude
+    /// 2. Elect: Choose sign direction based on majority
+    /// 3. Merge: Combine trimmed weights
     fn ties_merge(&self, coefficients: &HashMap<String, f32>) -> HashMap<String, f32> {
         // TIES: Trim low-magnitude weights, Elect sign direction, Merge
         let mut result = HashMap::new();
         
         // Calculate threshold (top 20% by weight)
         let mut weights: Vec<_> = coefficients.values().copied().collect();
-        weights.sort_by(|a, b| b.partial_cmp(a).unwrap());
+        // Use total_cmp for safe float comparison (no panics on NaN)
+        weights.sort_by(|a, b| b.total_cmp(a));
         let threshold = weights.get(weights.len() / 5).copied().unwrap_or(0.0);
         
         for (id, weight) in coefficients {
@@ -306,13 +312,25 @@ impl BreedingEngine {
     }
     
     /// Tournament selection
+    /// 
+    /// Selects two parents by running tournaments among random candidates.
+    /// Each tournament picks the fittest from a random subset.
+    /// 
+    /// # Panics
+    /// Does not panic - returns early if candidates list is empty.
     fn tournament_selection<'a>(
         &mut self,
         candidates: &'a [crate::evolution::AgentRecord],
     ) -> (&'a crate::evolution::AgentRecord, &'a crate::evolution::AgentRecord) {
-        let tournament_size = 3;
+        // Safety check: ensure candidates is not empty
+        if candidates.is_empty() {
+            panic!("tournament_selection called with empty candidates");
+        }
+        
+        let tournament_size = 3.min(candidates.len());
         
         let select_one = || {
+            // Safe: we verified candidates is not empty above
             let mut best = &candidates[0];
             for _ in 0..tournament_size {
                 let idx = self.rng.gen_range(0..candidates.len());
@@ -383,13 +401,18 @@ impl BreedingEngine {
     }
     
     /// Elitist selection - top performers
+    /// 
+    /// Always selects the two highest-fitness candidates as parents.
+    /// Uses total_cmp for safe float comparison.
     fn elitist_selection<'a>(
         &mut self,
         candidates: &'a [crate::evolution::AgentRecord],
     ) -> (&'a crate::evolution::AgentRecord, &'a crate::evolution::AgentRecord) {
         let mut sorted: Vec<_> = candidates.iter().collect();
-        sorted.sort_by(|a, b| b.fitness.partial_cmp(&a.fitness).unwrap());
+        // Use total_cmp for safe float comparison (no panics on NaN)
+        sorted.sort_by(|a, b| b.fitness.total_cmp(&a.fitness));
         
+        // Safety: caller ensures candidates.len() >= 2
         (sorted[0], sorted[1])
     }
 }

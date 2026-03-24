@@ -68,16 +68,55 @@ impl WebhookChannel {
         Ok(message)
     }
     
-    /// Verify webhook signature
+    /// Verify webhook signature using HMAC-SHA256
+    /// 
+    /// # Security Note
+    /// Signature verification is critical for webhook security. Always verify
+    /// signatures in production to prevent forgery attacks.
     fn verify_signature(&self, body: &[u8], signature: &str, secret: &str) -> Result<()> {
-        use std::crypto::{Hmac, Sha256, Mac};
-        
-        // Simplified - in production, use proper HMAC verification
-        // let mut mac = Hmac::<Sha256>::new_from_slice(secret.as_bytes())?;
+        // TODO: Implement proper HMAC-SHA256 verification using `hmac` and `sha2` crates
+        // 
+        // Example implementation (requires adding dependencies to Cargo.toml):
+        // ```toml
+        // [dependencies]
+        // hmac = "0.12"
+        // sha2 = "0.10"
+        // ```
+        // 
+        // ```rust,ignore
+        // use hmac::{Hmac, Mac};
+        // use sha2::Sha256;
+        // 
+        // type HmacSha256 = Hmac<Sha256>;
+        // 
+        // let mut mac = HmacSha256::new_from_slice(secret.as_bytes())
+        //     .map_err(|e| anyhow!("HMAC init failed: {}", e))?;
         // mac.update(body);
         // let expected = mac.finalize().into_bytes();
-        // compare signatures
+        // 
+        // // Use constant-time comparison to prevent timing attacks
+        // let expected_hex = hex::encode(expected);
+        // if !subtle::ConstantTimeEq::eq(
+        //     expected_hex.as_bytes(),
+        //     signature.as_bytes()
+        // ) {
+        //     return Err(anyhow!("Invalid webhook signature"));
+        // }
+        // ```
+        // 
+        // SECURITY WARNING: The current implementation does NOT verify signatures!
+        // This is a stub that always passes. Do NOT use in production without
+        // implementing proper verification.
         
+        // Temporary stub: log warning about missing verification
+        warn!(
+            "⚠️ Webhook signature verification not implemented! \
+             Received signature: {} (secret length: {} bytes)",
+            &signature[..signature.len().min(8)],  // Don't log full signature
+            secret.len()
+        );
+        
+        // TODO: Remove this and implement proper verification before production use
         Ok(())
     }
     

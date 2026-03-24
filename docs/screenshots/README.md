@@ -1,48 +1,45 @@
-# Screenshots & Visual Assets
+# 📸 Screenshots & GIFs
 
-This directory contains visual assets for the SuperInstance documentation.
+This folder contains visual assets for the SuperInstance README and documentation.
 
-## Required Assets
+## Required Screenshots
 
-### 1. TUI Dashboard (`dashboard.png`)
-A screenshot of the terminal dashboard showing:
-- Species panel with active agents
-- Resource usage graphs
-- Activity log
-- Quick actions menu
+| File | Description | Status |
+|:-----|:------------|:-------|
+| `dashboard.gif` | TUI + Web dashboard side-by-side view | 📝 Placeholder |
+| `breeding.gif` | TensorRT-LLM breeding with geometric snapping | 📝 Placeholder |
+| `memory.gif` | Memory Pasture RAG with CRDT in action | 📝 Placeholder |
+| `install.gif` | Single-binary install process | 📝 Placeholder |
 
-### 2. Web Interface (`web-interface.png`)
-A screenshot of the web dashboard showing:
-- Agent management interface
-- Breed editor
-- Night School scheduler
+## How to Capture
 
-### 3. Onboarding Wizard (`onboarding.png`)
-A screenshot of the setup wizard showing:
-- Feature selection screen
-- Channel connector setup
+Run the following on your Jetson Orin Nano:
 
-### 4. Night School (`night-school.png`)
-A screenshot or GIF of Night School running:
-- Evaluation phase
-- Breeding progress
-- Promotions
-
-## Recording Tips
-
-For best results on Jetson:
 ```bash
-# Record TUI session
+# Terminal recording with asciinema
 asciinema rec dashboard.cast
 
 # Convert to GIF
 agg dashboard.cast dashboard.gif
 
-# Or use terminalizer
-terminalizer record -k dashboard
-terminalizer render dashboard
+# Or use ttygif
+ttygif dashboard.cast
 ```
 
-## Current Placeholders
+## Recommended Recording
 
-Until real screenshots are available, the README uses ASCII art representations.
+1. **dashboard.gif** - Show both TUI (terminal) and browser dashboard updating in real-time
+2. **breeding.gif** - Show the geometric constraint solver routing requests to optimal species
+3. **memory.gif** - Show CRDT memory being written and synced across sessions
+4. **install.gif** - One-command install on fresh Jetson
+
+## Dimensions
+
+- Width: 1200px recommended
+- Height: 800px recommended
+- Format: GIF, max 5MB each
+- Frame rate: 15-30 fps
+
+## Placeholder Files
+
+Until real screenshots are captured, the README uses text-based diagrams instead of actual GIFs.

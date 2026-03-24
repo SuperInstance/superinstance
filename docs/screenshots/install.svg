@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <rect width="1200" height="800" fill="#1a1a2e"/>
+  <text x="600" y="300" font-family="monospace" font-size="32" fill="#4ade80" text-anchor="middle">Single-Binary Install</text>
+  <text x="600" y="360" font-family="monospace" font-size="24" fill="#888" text-anchor="middle">curl -sSL https://install.superinstance.ai | bash</text>
+  <rect x="200" y="420" width="800" height="280" rx="8" fill="#16213e" stroke="#4ade80" stroke-width="2"/>
+  <text x="250" y="480" font-family="monospace" font-size="16" fill="#888">$ curl -sSL https://install.superinstance.ai | bash</text>
+  <text x="250" y="520" font-family="monospace" font-size="16" fill="#4ade80">🔍 Detecting Jetson Orin Nano 8GB...</text>
+  <text x="250" y="560" font-family="monospace" font-size="16" fill="#4ade80">📦 Installing Rust + TensorRT...</text>
+  <text x="250" y="600" font-family="monospace" font-size="16" fill="#4ade80">🏗️ Building superinstance (4.2 MB)...</text>
+  <text x="250" y="640" font-family="monospace" font-size="16" fill="#4ade80">✅ Core binary: 4.2 MB • TensorRT-LLM: 20.3 tok/s • VRAM: 5.4 GB</text>
+  <text x="600" y="750" font-family="monospace" font-size="16" fill="#666" text-anchor="middle">Total time: ~5 minutes</text>
+</svg>

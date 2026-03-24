@@ -1,0 +1,27 @@
+# Memory Pasture Screenshot Placeholder
+
+This file is a placeholder for the actual memory.gif.
+
+## To Generate
+
+1. Run a task that uses memory:
+   ```bash
+   curl -X POST http://localhost:3000/api/species/email-cow-v1/task \
+     -d '{"action": "remember", "key": "user_preference", "value": "brief summaries"}'
+   ```
+
+2. Show the memory being stored in CRDT format
+
+3. Restart the ranch and show memory persistence
+
+## Expected Content
+
+The GIF should show:
+- Memory being written to CRDT store
+- Memory being synced across sessions
+- Memory being retrieved by different species
+- The "Memory Pasture" visualized as a graph
+
+## Text Alternative
+
+See the README's CRDT Memory Pasture section for the architecture diagram.

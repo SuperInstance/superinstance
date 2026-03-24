@@ -1,0 +1,29 @@
+# Install Screenshot Placeholder
+
+This file is a placeholder for the actual install.gif.
+
+## To Generate
+
+1. On a fresh Jetson Orin Nano:
+   ```bash
+   curl -sSL https://install.superinstance.ai | bash
+   ```
+
+2. Record the entire installation process
+
+## Expected Content
+
+The GIF should show:
+- Hardware detection (Jetson Orin Nano 8GB detected)
+- Dependency installation (Rust, TensorRT)
+- Base model download (Phi-3 Mini)
+- Build progress
+- First run output:
+  ```
+  Core binary: 4.2 MB • TensorRT-LLM: 20.3 tok/s • VRAM: 5.4 GB
+  ```
+- Dashboard appearing
+
+## Text Alternative
+
+See the README's One-Command Install section for the installation flow diagram.

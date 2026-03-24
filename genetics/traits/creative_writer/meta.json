@@ -1,10 +1,56 @@
-{
-  "id": "creative_writer",
-  "name": "Creative Writer",
-  "description": "Generates creative, imaginative content with vivid descriptions",
-  "size_bytes": 55000000,
-  "compatible_species": ["Cattle"],
-  "tags": ["style", "creative", "writing"],
-  "load_time_ms": 180,
-  "swap_time_ms": 45
-}
+# 🧬 Trait: Creative Writer
+
+A dynamic LoRA trait for creative writing abilities. This trait can be loaded at runtime without touching the core binary.
+
+## Loading
+
+```bash
+# The trait is automatically loaded when referenced in a breed.md
+# Or manually via:
+curl -X POST http://localhost:3000/api/traits/load \
+  -H "Content-Type: application/json" \
+  -d '{"trait": "creative_writer"}'
+```
+
+## Gene Composition
+
+| Gene | Weight | Effect |
+|:-----|:-------|:-------|
+| `storytelling` | 0.9 | Strong narrative structure |
+| `metaphor_use` | 0.7 | Vivid imagery |
+| `character_depth` | 0.8 | Complex characters |
+| `pacing` | 0.6 | Balanced rhythm |
+
+## Example Usage in breed.md
+
+```markdown
+# 🐄 Breed: Storyteller-Cow-v1
+
+## 🧬 Genetic Composition
+| Gene Trait | Weight | Description |
+| :--- | :--- | :--- |
+| `creative_writer` | `1.0` | Full creative writing trait |
+| `polite_tone` | `0.3` | Light formality |
+
+## 🧠 Genetic Code
+```
+You are a master storyteller.
+Weave engaging narratives with rich characters.
+Use vivid metaphors and maintain excellent pacing.
+```
+```
+
+## Trait File Structure
+
+```
+genetics/traits/creative_writer/
+├── meta.json          # This file (trait metadata)
+├── adapter.safetensor # LoRA weights (~150 MB)
+└── config.json        # LoRA configuration
+```
+
+## Performance
+
+- Load time: <200ms
+- Memory overhead: 150 MB VRAM
+- No core binary change required

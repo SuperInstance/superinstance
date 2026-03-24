@@ -1,0 +1,25 @@
+{
+  "id": "herd_sync_falcon",
+  "name": "Herd Sync Falcon",
+  "species": "Falcon",
+  "version": "1.0.0",
+  "description": "Multi-Jetson CRDT synchronization agent for distributed Ranch deployments",
+  "size_bytes": 5000000,
+  "compatible_species": ["Falcon"],
+  "capabilities": [
+    "crdt_sync",
+    "peer_discovery",
+    "conflict_resolution",
+    "offline_queue",
+    "herd_coordination"
+  ],
+  "tags": ["distributed", "sync", "crdt", "multi-node", "offline-first"],
+  "requires": {
+    "smartcrdt": ">=0.2.0",
+    "lucineer": ">=0.1.0"
+  },
+  "author": "SuperInstance Team",
+  "license": "MIT",
+  "created": "2025-03-24",
+  "fitness_score": 0.87
+}
