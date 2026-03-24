@@ -35,6 +35,7 @@
 
 | Metric | Cloud Agent | LocalGPT/Moltis | SuperInstance (TensorRT-LLM) |
 |:-------|:------------|:----------------|:-----------------------------|
+| **Core Binary Size** | N/A | 50-200 MB | **4.2 MB (fixed forever)** |
 | **First Token Latency** | 1.5s | 50-100ms | **<5ms** (TensorRT-LLM) |
 | **Tokens/sec (Phi-3)** | N/A | 8-12 | **18-22** (2× faster) |
 | **VRAM (8GB Jetson)** | N/A | 6.5 GB (unstable) | **<6 GB** (stable) |
@@ -45,6 +46,7 @@
 | **Inference Engine** | Proprietary | llama.cpp | **TensorRT-LLM** |
 | **Routing** | Black box | LLM guessing | **Geometric determinism** |
 | **Memory** | Session | Session | **CRDT Memory Pasture** |
+| **Extensibility** | Plugins | Plugins | **breed.md files** |
 | **Year Cost** | $2,400/year | $0 (slow) | **$0** (after $499 hardware) |
 
 ---
@@ -632,6 +634,109 @@ Output Length: 128 tokens
 - NVIDIA GPU with 6GB+ VRAM
 - 16GB+ RAM
 - Ubuntu 22.04+
+
+---
+
+## 📐 How It Stays Small While Becoming God-Tier
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    MODULAR ARCHITECTURE                                  │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│   ┌─────────────────────────────────────────────────────────────────┐   │
+│   │                    TINY CORE (4.2 MB)                           │   │
+│   │                                                                 │   │
+│   │   • Border Collie orchestrator                                 │   │
+│   │   • breed.md parser (Markdown → Agent)                         │   │
+│   │   • LoRA hot-swap engine                                       │   │
+│   │   • CRDT memory primitives                                     │   │
+│   │   • Species router (deterministic)                             │   │
+│   │                                                                 │   │
+│   │   SIZE: 4.2 MB │ STARTUP: <100ms │ NEVER GROWS                │   │
+│   └─────────────────────────────────────────────────────────────────┘   │
+│                              │                                           │
+│                              ▼                                           │
+│   ┌─────────────────────────────────────────────────────────────────┐   │
+│   │                  DYNAMIC PASTURE (Editable)                     │   │
+│   │                                                                 │   │
+│   │   pasture/cattle/email-cow-v1/breed.md  ← Edit this            │   │
+│   │   pasture/cattle/code-cow-v2/breed.md                          │   │
+│   │   genetics/traits/polite_tone/adapter.safetensors               │   │
+│   │   genetics/traits/json_output/adapter.safetensors               │   │
+│   │                                                                 │   │
+│   │   LOAD TIME: <200ms per agent │ HOT-RELOAD: instant            │   │
+│   └─────────────────────────────────────────────────────────────────┘   │
+│                              │                                           │
+│                              ▼                                           │
+│   ┌─────────────────────────────────────────────────────────────────┐   │
+│   │                  INFINITE ABILITIES                             │   │
+│   │                                                                 │   │
+│   │   📧 Email triage       🔧 Code review       📊 Data analysis  │   │
+│   │   🏠 Smart home         📝 Documentation     🎨 Creative       │   │
+│   │   🔍 Research           📈 Forecasting       🤝 Negotiation    │   │
+│   │   ...add any ability with a single breed.md file              │   │
+│   │                                                                 │   │
+│   │   CORE SIZE: UNCHANGED (4.2 MB forever)                        │   │
+│   └─────────────────────────────────────────────────────────────────┘   │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### The 20 Principles of Small-Core + Dynamic-Abilities
+
+1. **Core binary never exceeds 5 MB** — compile with `--release`, verify with `ls -la target/release/superinstance`
+
+2. **All abilities live in `breed.md` files** — edit Markdown, not Rust
+
+3. **LoRA adapters are hot-swappable** — <200ms load, <50ms swap
+
+4. **Backend crates are optional** — `cudaclaw`, `constraint-theory`, `smartcrdt`, `lucineer`
+
+5. **No recompilation needed** — new abilities via file edits only
+
+6. **TensorRT-LLM is a feature flag** — `cargo build --features tensorrt`
+
+7. **Paged KV-cache managed dynamically** — RAM allocated from config, not binary
+
+8. **Geometric routing via constraint files** — YAML rules, not compiled logic
+
+9. **CRDT memory persisted to SQLite** — state outside binary
+
+10. **RAG indices built at runtime** — FAISS/ScaNN files, not embedded
+
+11. **Species definitions are data** — `pasture/*/breed.md` parsed at startup
+
+12. **Gene pool is a directory** — `genetics/traits/*/adapter.safetensors`
+
+13. **Night School scripts are Python** — `night_school/breed.py`
+
+14. **Channel connectors configured via .env** — no hardcoding
+
+15. **TUI dashboard reads from state** — not compiled layouts
+
+16. **Web interface is Next.js** — separate process, not embedded
+
+17. **Benchmarks print on first run** — `make benchmark` after install
+
+18. **CI fails if binary >5 MB** — enforced in `.github/workflows/ci.yml`
+
+19. **New species = new folder** — copy `pasture/cattle/template/`, edit `breed.md`
+
+20. **Core is immutable; Pasture evolves** — the only way to add abilities
+
+### Add a New Ability in 60 Seconds
+
+```bash
+# 1. Copy template
+cp -r pasture/cattle/template pasture/cattle/my-new-ability
+
+# 2. Edit the breed.md
+nano pasture/cattle/my-new-ability/breed.md
+
+# 3. Save and reload (automatic)
+# Your new ability is live. Core binary unchanged.
+```
 
 ---
 

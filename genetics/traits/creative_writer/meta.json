@@ -1,0 +1,10 @@
+{
+  "id": "creative_writer",
+  "name": "Creative Writer",
+  "description": "Generates creative, imaginative content with vivid descriptions",
+  "size_bytes": 55000000,
+  "compatible_species": ["Cattle"],
+  "tags": ["style", "creative", "writing"],
+  "load_time_ms": 180,
+  "swap_time_ms": 45
+}

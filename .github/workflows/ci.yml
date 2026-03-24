@@ -120,3 +120,34 @@ jobs:
           test -f examples/coder/breed.md || (echo "Coder example missing!" && exit 1)
           test -f examples/smart-home/breed.md || (echo "Smart home example missing!" && exit 1)
           test -f examples/maker/breed.md || (echo "Maker example missing!" && exit 1)
+
+  # Binary size enforcement
+  binary-size:
+    name: Binary Size Check (<5 MB)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build release
+        run: cd superinstance && cargo build --release
+
+      - name: Check binary size
+        run: |
+          BINARY="superinstance/target/release/superinstance"
+          if [ -f "$BINARY" ]; then
+            SIZE=$(stat -c%s "$BINARY")
+            SIZE_MB=$((SIZE / 1024 / 1024))
+            echo "Binary size: $SIZE_MB MB ($SIZE bytes)"
+            if [ $SIZE_MB -gt 5 ]; then
+              echo "❌ FAIL: Binary size ($SIZE_MB MB) exceeds 5 MB limit!"
+              echo "Core must stay under 5 MB. Move heavy deps to backend/."
+              exit 1
+            else
+              echo "✅ PASS: Binary size ($SIZE_MB MB) within 5 MB limit"
+            fi
+          else
+            echo "Binary not found - skipping size check"
+          fi
