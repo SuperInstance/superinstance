@@ -141,10 +141,7 @@ tokio-tungstenite = { version = "0.21", features = ["rustls-tls-webpki-roots"] }
 sysinfo = "0.30"
 
 # Discord Integration
-[dependencies.serenity]
-version = "0.12"
-default-features = false
-features = ["client", "gateway", "rustls_backend", "model", "cache", "http"]
+serenity = { version = "0.12", default-features = false, features = ["client", "gateway", "rustls_backend", "model", "cache", "http"] }
 
 # Telegram Integration
 teloxide = { version = "0.12", features = ["rustls"], optional = true }

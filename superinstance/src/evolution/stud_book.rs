@@ -87,6 +87,19 @@ pub struct StudBookStats {
     pub total_culls: u64,
 }
 
+impl Default for StudBookStats {
+    fn default() -> Self {
+        Self {
+            total_agents: 0,
+            active_agents: 0,
+            total_generations: 0,
+            avg_fitness: 0.0,
+            total_breeding_events: 0,
+            total_culls: 0,
+        }
+    }
+}
+
 impl StudBook {
     /// Create a new Stud Book database
     pub fn new(path: &str) -> Result<Self> {

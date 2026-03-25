@@ -157,6 +157,14 @@ clean: ## Clean build artifacts
 test: ## Run tests
         cargo test --release
 
+test-night-school: ## Run Night School tests only
+        @echo "🧪 Running Night School tests..."
+        cd superinstance && cargo test --release night_school
+
+test-api: ## Run API tests
+        @echo "🧪 Running API tests..."
+        cd superinstance && cargo test --release api
+
 test-coverage: ## Run tests with coverage
         cargo tarpaulin --out Html
 

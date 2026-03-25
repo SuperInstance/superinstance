@@ -10,23 +10,34 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use parking_lot::RwLock;
+use chrono::{DateTime, Local, TimeZone, Utc};
+use parking_lot::{Mutex, RwLock};
 use serde::{Deserialize, Serialize};
-use tracing::{info, warn};
+use tokio::time::{sleep, Duration};
+use tracing::{error, info, warn};
 
 use super::{BreedingEngine, StudBook, AgentRecord, SelectionStrategy};
 use crate::species::{SpeciesRegistry, SpeciesType};
 
+/// Default hour for Night School (02:00)
+pub const NIGHT_SCHOOL_HOUR: u32 = 2;
+
 /// Night School - Daily evolution cycle
 pub struct NightSchool {
     /// Stud Book reference
-    stud_book: Arc<RwLock<StudBook>>,
+    stud_book: Arc<Mutex<StudBook>>,
     /// Species Registry reference
     species_registry: Arc<RwLock<SpeciesRegistry>>,
     /// Culling threshold
     cull_threshold: f32,
     /// Breeding engine
     breeding_engine: BreedingEngine,
+    /// Last run timestamp
+    last_run: Arc<RwLock<Option<DateTime<Utc>>>>,
+    /// Schedule hour (24-hour format, default 2)
+    schedule_hour: u32,
+    /// Manual trigger flag
+    manual_trigger: Arc<RwLock<bool>>,
 }
 
 /// Report from a Night School session
@@ -67,7 +78,7 @@ pub struct SpeciesEvolutionResult {
 impl NightSchool {
     /// Create a new Night School instance
     pub fn new(
-        stud_book: Arc<RwLock<StudBook>>,
+        stud_book: Arc<Mutex<StudBook>>,
         species_registry: Arc<RwLock<SpeciesRegistry>>,
         cull_threshold: f32,
     ) -> Self {
@@ -76,6 +87,117 @@ impl NightSchool {
             species_registry,
             cull_threshold,
             breeding_engine: BreedingEngine::default_engine(),
+            last_run: Arc::new(RwLock::new(None)),
+            schedule_hour: NIGHT_SCHOOL_HOUR,
+            manual_trigger: Arc::new(RwLock::new(false)),
+        }
+    }
+    
+    /// Create with custom schedule hour
+    pub fn with_schedule_hour(mut self, hour: u32) -> Self {
+        self.schedule_hour = hour % 24;
+        self
+    }
+    
+    /// Get last run timestamp
+    pub fn last_run(&self) -> Option<DateTime<Utc>> {
+        *self.last_run.read()
+    }
+    
+    /// Trigger manual run (used by /api/night endpoint)
+    pub fn trigger_manual(&self) {
+        *self.manual_trigger.write() = true;
+    }
+    
+    /// Calculate time until next scheduled run
+    pub fn time_until_next_run(&self) -> Duration {
+        let now = Local::now();
+        
+        // Build next run time safely
+        let next_run_time = match now.date_naive().and_hms_opt(self.schedule_hour, 0, 0) {
+            Some(dt) => {
+                match dt.and_local_timezone(Local) {
+                    chrono::LocalResult::Single(local) => local,
+                    chrono::LocalResult::Ambiguous(local, _) => local,
+                    chrono::LocalResult::None => {
+                        // Fallback to 1 hour from now
+                        return Duration::from_secs(3600);
+                    }
+                }
+            }
+            None => {
+                return Duration::from_secs(3600);
+            }
+        };
+        
+        let next_run = if next_run_time > now {
+            next_run_time
+        } else {
+            next_run_time + chrono::Duration::days(1)
+        };
+        
+        (next_run - now)
+            .to_std()
+            .unwrap_or(Duration::from_secs(3600))
+    }
+    
+    /// Run the cron scheduler loop (tokio-based)
+    /// 
+    /// This is the main entry point for the background task that:
+    /// 1. Waits until 02:00 (or configured hour)
+    /// 2. Runs the evolution cycle
+    /// 3. Repeats forever
+    pub async fn run_cron(&self) -> Result<()> {
+        info!("🌙 Night School cron scheduler started (runs at {:02}:00)", self.schedule_hour);
+        
+        loop {
+            // Check for manual trigger
+            if *self.manual_trigger.read() {
+                info!("🌙 Manual Night School trigger received");
+                *self.manual_trigger.write() = false;
+                
+                if let Err(e) = self.run().await {
+                    error!("Night School error: {}", e);
+                }
+                continue;
+            }
+            
+            // Calculate time until next run
+            let sleep_duration = self.time_until_next_run();
+            
+            info!(
+                "🌙 Next Night School in {}h {}m",
+                sleep_duration.as_secs() / 3600,
+                (sleep_duration.as_secs() % 3600) / 60
+            );
+            
+            // Sleep with periodic checks for manual trigger
+            let check_interval = Duration::from_secs(60);
+            let mut remaining = sleep_duration;
+            
+            while remaining > Duration::ZERO {
+                let sleep_time = std::cmp::min(remaining, check_interval);
+                sleep(sleep_time).await;
+                remaining = remaining.saturating_sub(check_interval);
+                
+                // Check for manual trigger during wait
+                if *self.manual_trigger.read() {
+                    info!("🌙 Manual Night School trigger received during wait");
+                    *self.manual_trigger.write() = false;
+                    
+                    if let Err(e) = self.run().await {
+                        error!("Night School error: {}", e);
+                    }
+                    break;
+                }
+            }
+            
+            // Time for scheduled run
+            if remaining == Duration::ZERO {
+                if let Err(e) = self.run().await {
+                    error!("Night School error: {}", e);
+                }
+            }
         }
     }
     
@@ -86,7 +208,7 @@ impl NightSchool {
         
         // Get stats before
         let stats_before = {
-            let book = self.stud_book.read();
+            let book = self.stud_book.lock();
             book.get_stats()?
         };
         
@@ -132,7 +254,7 @@ impl NightSchool {
         
         // Get stats after
         let stats_after = {
-            let book = self.stud_book.read();
+            let book = self.stud_book.lock();
             book.get_stats()?
         };
         report.avg_fitness_after = stats_after.avg_fitness;
@@ -141,6 +263,12 @@ impl NightSchool {
         for species in SpeciesType::all() {
             let result = self.get_species_evolution_result(species)?;
             report.species_results.push(result);
+        }
+        
+        // Update last run timestamp
+        {
+            let mut last = self.last_run.write();
+            *last = Some(report.timestamp);
         }
         
         let elapsed = start.elapsed();
@@ -160,18 +288,22 @@ impl NightSchool {
         // In production, this would analyze task logs and update fitness
         // For now, simulate fitness decay and random improvement
         
-        let agents = registry.get_ranked();
-        for agent in agents {
+        // Collect agents first to avoid borrow conflicts
+        let agents: Vec<_> = registry.get_ranked().into_iter().map(|a| {
+            (a.id.clone(), a.fitness, a.total_tasks, a.successful_tasks)
+        }).collect();
+        
+        for (id, fitness, total_tasks, successful_tasks) in agents {
             // Simulate fitness evaluation based on performance
-            let success_rate = if agent.total_tasks > 0 {
-                agent.successful_tasks as f32 / agent.total_tasks as f32
+            let success_rate = if total_tasks > 0 {
+                successful_tasks as f32 / total_tasks as f32
             } else {
                 0.5
             };
             
             // Update fitness (moving average)
-            let new_fitness = (agent.fitness * 0.7) + (success_rate * 0.3);
-            registry.update_fitness(&agent.id, new_fitness);
+            let new_fitness = (fitness * 0.7) + (success_rate * 0.3);
+            registry.update_fitness(&id, new_fitness);
         }
         
         Ok(())
@@ -179,7 +311,7 @@ impl NightSchool {
     
     /// Cull agents below fitness threshold
     fn cull_underperformers(&self) -> Result<Vec<String>> {
-        let book = self.stud_book.read();
+        let book = self.stud_book.lock();
         let underperformers = book.get_underperformers(self.cull_threshold)?;
         drop(book);
         
@@ -188,7 +320,7 @@ impl NightSchool {
         for agent in underperformers {
             // Cull in Stud Book
             {
-                let book = self.stud_book.read();
+                let book = self.stud_book.lock();
                 // Would call cull_agent here
             }
             
@@ -212,14 +344,16 @@ impl NightSchool {
     
     /// Breed new generation from top performers
     fn breed_new_generation(&self, generation: u32) -> Result<Vec<super::Offspring>> {
-        let book = self.stud_book.read();
-        
         let mut offspring_list = Vec::new();
         let mut engine = BreedingEngine::default_engine();
         
         // Breed for each species
         for species in SpeciesType::all() {
-            let top_performers = book.get_top_performers(species, 10)?;
+            // Acquire lock inside the loop to avoid holding it across iterations
+            let top_performers = {
+                let book = self.stud_book.lock();
+                book.get_top_performers(species, 10)?
+            };
             
             if top_performers.len() < 2 {
                 warn!("  Not enough {} for breeding (need 2, have {})", 
@@ -234,16 +368,11 @@ impl NightSchool {
                 SelectionStrategy::Tournament,
             );
             
-            drop(book); // Release lock before breeding
-            
             // Breed each pair
             for pair in pairs {
                 let offspring = engine.breed(pair, generation)?;
                 offspring_list.push(offspring);
             }
-            
-            // Re-acquire lock for next species
-            // (In production, would restructure to avoid this)
         }
         
         Ok(offspring_list)
@@ -292,7 +421,7 @@ impl NightSchool {
             });
             
             // Log in Stud Book
-            let book = self.stud_book.read();
+            let book = self.stud_book.lock();
             // Would register agent here
         }
         
@@ -384,10 +513,104 @@ impl Default for CloudDistiller {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::Arc;
+    use parking_lot::{Mutex, RwLock};
+    
+    fn create_test_night_school() -> NightSchool {
+        let stud_book = Arc::new(Mutex::new(
+            StudBook::new(":memory:").expect("Failed to create in-memory StudBook")
+        ));
+        let species_registry = Arc::new(RwLock::new(SpeciesRegistry::new()));
+        NightSchool::new(stud_book, species_registry, 0.4)
+    }
     
     #[tokio::test]
-    async fn test_night_school() {
-        // This test would require mocking the StudBook and Registry
-        // For now, just verify the module compiles
+    async fn test_night_school_creation() {
+        let night_school = create_test_night_school();
+        assert!(night_school.last_run().is_none());
+        assert_eq!(night_school.schedule_hour, NIGHT_SCHOOL_HOUR);
+    }
+    
+    #[tokio::test]
+    async fn test_night_school_with_custom_hour() {
+        let night_school = create_test_night_school().with_schedule_hour(3);
+        assert_eq!(night_school.schedule_hour, 3);
+    }
+    
+    #[tokio::test]
+    async fn test_time_until_next_run() {
+        let night_school = create_test_night_school();
+        let duration = night_school.time_until_next_run();
+        
+        // Should be less than 24 hours
+        assert!(duration < Duration::from_secs(24 * 60 * 60));
+        // Should be at least 0
+        assert!(duration > Duration::ZERO);
+    }
+    
+    #[tokio::test]
+    async fn test_manual_trigger() {
+        let night_school = create_test_night_school();
+        
+        // Initially not triggered
+        assert!(!*night_school.manual_trigger.read());
+        
+        // Trigger
+        night_school.trigger_manual();
+        assert!(*night_school.manual_trigger.read());
+    }
+    
+    #[tokio::test]
+    async fn test_night_school_report_serialization() {
+        let report = NightSchoolReport {
+            timestamp: chrono::Utc::now(),
+            day: 1,
+            culled_count: 2,
+            bred_count: 3,
+            promoted_count: 1,
+            quarantined_count: 2,
+            avg_fitness_before: 0.5,
+            avg_fitness_after: 0.6,
+            species_results: vec![],
+        };
+        
+        let json = serde_json::to_string(&report).expect("Failed to serialize");
+        assert!(json.contains("culled_count"));
+        assert!(json.contains("bred_count"));
+        
+        let deserialized: NightSchoolReport = 
+            serde_json::from_str(&json).expect("Failed to deserialize");
+        assert_eq!(deserialized.culled_count, 2);
+        assert_eq!(deserialized.bred_count, 3);
+    }
+    
+    #[test]
+    fn test_cloud_distiller_creation() {
+        let distiller = CloudDistiller::new();
+        assert_eq!(distiller.sample_size, 100);
+    }
+    
+    #[tokio::test]
+    async fn test_distillation_result() {
+        let distiller = CloudDistiller::new();
+        let result = distiller.distill(&[]).await.expect("Distillation failed");
+        assert_eq!(result.samples_used, 0);
+    }
+    
+    #[tokio::test]
+    async fn test_night_school_full_cycle() {
+        let night_school = create_test_night_school();
+        
+        // Run the full cycle
+        let result = night_school.run().await;
+        
+        // Should succeed
+        assert!(result.is_ok());
+        
+        let report = result.unwrap();
+        assert!(report.timestamp <= chrono::Utc::now());
+        
+        // Last run should be updated
+        assert!(night_school.last_run().is_some());
     }
 }

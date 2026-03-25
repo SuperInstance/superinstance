@@ -147,7 +147,7 @@ pub use ranch::{Ranch, ResourceUsage, morning_routine};
 pub use collie::{Collie, AnticipationEngine, ReflexCache, Shepherd};
 pub use species::{Species, SpeciesOps, SpeciesType, SpeciesRegistry, Intent};
 pub use pasture::{Pasture, PastureStats, LoRAManager, ModelPool};
-pub use evolution::{NightSchool, StudBook, BreedingPipeline};
+pub use evolution::{NightSchool, StudBook, BreedingEngine, Offspring, ParentPair};
 pub use genetics::{BreedManifest, GeneWeight, Lineage, Phenotype};
 
 /// Hardware constraints for Jetson Orin Nano 8GB

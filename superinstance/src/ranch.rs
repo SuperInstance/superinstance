@@ -11,7 +11,7 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use anyhow::Result;
-use parking_lot::RwLock;
+use parking_lot::{Mutex, RwLock};
 use tokio::time::sleep;
 use tracing::{debug, info, warn};
 
@@ -30,7 +30,7 @@ pub struct Ranch {
     /// The Pasture - resource management for models and adapters
     pasture: Arc<Pasture>,
     /// The Stud Book - tracks evolution and genetics
-    stud_book: Arc<RwLock<StudBook>>,
+    stud_book: Arc<Mutex<StudBook>>,
     /// Species Registry - all available livestock
     species_registry: Arc<RwLock<SpeciesRegistry>>,
     /// Current day counter (for evolution tracking)
@@ -68,7 +68,7 @@ impl Ranch {
         let pasture = Arc::new(Pasture::new(&config).await?);
         
         info!("Initializing Stud Book (Evolution Database)...");
-        let stud_book = Arc::new(RwLock::new(
+        let stud_book = Arc::new(Mutex::new(
             StudBook::new(&config.stud_book_path)?
         ));
         
@@ -241,6 +241,38 @@ impl Ranch {
                 warn!("⚠️ VRAM usage critical: {:.1}%", usage.vram_used_percent());
             }
         }
+    }
+    
+    /// Check if Night School is enabled
+    pub fn is_night_school_enabled(&self) -> bool {
+        self.config.night_school_enabled
+    }
+    
+    /// Get time until next Night School run
+    pub fn get_night_school_next_run(&self) -> Duration {
+        use chrono::{Local, TimeZone};
+        
+        let now = Local::now();
+        let hour = NIGHT_SCHOOL_HOUR;
+        
+        let next_run_time = match now.date_naive().and_hms_opt(hour, 0, 0) {
+            Some(dt) => {
+                match dt.and_local_timezone(Local) {
+                    chrono::LocalResult::Single(local) => local,
+                    chrono::LocalResult::Ambiguous(local, _) => local,
+                    chrono::LocalResult::None => return Duration::from_secs(3600),
+                }
+            }
+            None => return Duration::from_secs(3600),
+        };
+        
+        let next_run = if next_run_time > now {
+            next_run_time
+        } else {
+            next_run_time + chrono::Duration::days(1)
+        };
+        
+        (next_run - now).to_std().unwrap_or(Duration::from_secs(3600))
     }
 }
 

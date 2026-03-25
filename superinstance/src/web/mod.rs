@@ -53,16 +53,22 @@ pub type RanchState = Arc<Ranch>;
 
 /// Web server configuration
 pub struct WebConfig {
-    pub addr: SocketAddr,
+    pub port: u16,
     pub enable_dashboard: bool,
 }
 
 impl Default for WebConfig {
     fn default() -> Self {
         Self {
-            addr: SocketAddr::from(([0, 0, 0, 0], 3000)),
+            port: 3000,
             enable_dashboard: true,
         }
+    }
+}
+
+impl WebConfig {
+    pub fn addr(&self) -> SocketAddr {
+        SocketAddr::from(([0, 0, 0, 0], self.port))
     }
 }
 
@@ -72,6 +78,8 @@ pub async fn start_server(
     ranch_state: RanchState,
     mut shutdown: broadcast::Receiver<()>,
 ) -> anyhow::Result<()> {
+    use tokio::net::TcpListener;
+    
     let app = Router::new()
         // API routes
         .route("/api/status", get(api::status))
@@ -79,6 +87,9 @@ pub async fn start_server(
         .route("/api/species/:name", get(api::get_species))
         .route("/api/breed", post(api::create_breed))
         .route("/api/night-school", post(api::run_night_school))
+        // Night School API
+        .route("/api/night", get(api::get_night_school_status))
+        .route("/api/night", post(api::trigger_night_school))
         // Dashboard (Dioxus SPA)
         .route("/", get(dashboard::serve_dashboard))
         .route("/assets/*path", get(dashboard::serve_assets))
@@ -86,18 +97,18 @@ pub async fn start_server(
         .route("/ws", get(api::websocket_handler))
         .layer(Extension(ranch_state));
 
-    tracing::info!("🌐 Web server starting on {}", config.addr);
+    let addr = config.addr();
+    tracing::info!("🌐 Web server starting on {}", addr);
 
-    // Use the older axum 0.6 style for compatibility
-    let addr = config.addr;
-    let server = axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .with_graceful_shutdown(async {
+    let listener = TcpListener::bind(addr).await?;
+    
+    // Use axum 0.7 serve pattern
+    axum::serve(listener, app)
+        .with_graceful_shutdown(async move {
             let _ = shutdown.recv().await;
             tracing::info!("🌐 Web server shutting down");
-        });
-
-    server.await?;
+        })
+        .await?;
 
     Ok(())
 }

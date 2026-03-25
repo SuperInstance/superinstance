@@ -17,7 +17,7 @@ pub use reflex::*;
 use std::sync::Arc;
 
 use anyhow::Result;
-use parking_lot::RwLock;
+use parking_lot::{Mutex, RwLock};
 use tracing::{debug, info};
 
 use crate::evolution::StudBook;
@@ -29,7 +29,7 @@ pub struct Collie {
     /// Reference to the Pasture (resources)
     pasture: Arc<Pasture>,
     /// Reference to the Stud Book (evolution)
-    stud_book: Arc<RwLock<StudBook>>,
+    stud_book: Arc<Mutex<StudBook>>,
     /// Reference to the Species Registry
     species_registry: Arc<RwLock<SpeciesRegistry>>,
     /// Anticipation engine (Shadow Pup)
@@ -44,7 +44,7 @@ impl Collie {
     /// Create a new Border Collie instance
     pub fn new(
         pasture: Arc<Pasture>,
-        stud_book: Arc<RwLock<StudBook>>,
+        stud_book: Arc<Mutex<StudBook>>,
         species_registry: Arc<RwLock<SpeciesRegistry>>,
     ) -> Self {
         Self {
@@ -101,7 +101,7 @@ impl Collie {
         
         // Step 5: Log the task to Stud Book for evolution tracking
         {
-            let mut book = self.stud_book.write();
+            let mut book = self.stud_book.lock();
             book.log_task(species, intent, &result)?;
         }
         

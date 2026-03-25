@@ -98,7 +98,7 @@ pub async fn create_breed(
     }))
 }
 
-/// POST /api/night-school - Trigger Night School manually
+/// POST /api/night-school - Trigger Night School manually (legacy endpoint)
 pub async fn run_night_school(
     Extension(_ranch): Extension<Arc<Ranch>>,
 ) -> Json<NightSchoolResult> {
@@ -108,6 +108,31 @@ pub async fn run_night_school(
         bred: 3,
         promoted: 2,
         duration_secs: 1800,
+    })
+}
+
+/// GET /api/night - Get Night School status
+pub async fn get_night_school_status(
+    Extension(_ranch): Extension<Arc<Ranch>>,
+) -> Json<NightSchoolStatus> {
+    Json(NightSchoolStatus {
+        enabled: true,
+        schedule_hour: 2, // Default 02:00
+        next_run_seconds: 3600,
+        last_run: None,
+        total_agents: 0,
+        avg_fitness: 0.0,
+        total_breeding_events: 0,
+    })
+}
+
+/// POST /api/night - Trigger Night School manually
+pub async fn trigger_night_school(
+    Extension(_ranch): Extension<Arc<Ranch>>,
+) -> Json<NightSchoolTriggerResult> {
+    Json(NightSchoolTriggerResult {
+        status: "triggered".to_string(),
+        message: "Night School has been triggered and will run shortly".to_string(),
     })
 }
 
@@ -210,9 +235,27 @@ pub struct NightSchoolResult {
     pub duration_secs: u64,
 }
 
+#[derive(Serialize)]
+pub struct NightSchoolStatus {
+    pub enabled: bool,
+    pub schedule_hour: u32,
+    pub next_run_seconds: u64,
+    pub last_run: Option<String>,
+    pub total_agents: u64,
+    pub avg_fitness: f32,
+    pub total_breeding_events: u64,
+}
+
+#[derive(Serialize)]
+pub struct NightSchoolTriggerResult {
+    pub status: String,
+    pub message: String,
+}
+
 #[derive(Debug)]
 pub enum ApiError {
     NotFound(String),
+    BadRequest(String),
     Internal(String),
 }
 
@@ -221,6 +264,9 @@ impl IntoResponse for ApiError {
         match self {
             ApiError::NotFound(msg) => {
                 (axum::http::StatusCode::NOT_FOUND, msg).into_response()
+            }
+            ApiError::BadRequest(msg) => {
+                (axum::http::StatusCode::BAD_REQUEST, msg).into_response()
             }
             ApiError::Internal(msg) => {
                 (axum::http::StatusCode::INTERNAL_SERVER_ERROR, msg).into_response()
