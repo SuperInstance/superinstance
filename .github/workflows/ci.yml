@@ -165,3 +165,56 @@ jobs:
             echo "❌ FAIL: Dioxus web module not found!"
             exit 1
           fi
+
+  # Installer validation
+  installer:
+    name: Installer Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check install script exists and is executable
+        run: |
+          # Check root install script
+          if [ -f "scripts/install_jetson.sh" ]; then
+            echo "✅ scripts/install_jetson.sh exists"
+            if [ -x "scripts/install_jetson.sh" ]; then
+              echo "✅ scripts/install_jetson.sh is executable"
+            else
+              echo "⚠️ scripts/install_jetson.sh is not executable - fixing..."
+              chmod +x scripts/install_jetson.sh
+              echo "✅ Made executable"
+            fi
+          else
+            echo "❌ FAIL: scripts/install_jetson.sh not found!"
+            exit 1
+          fi
+          
+          # Check superinstance install script
+          if [ -f "superinstance/scripts/install_jetson.sh" ]; then
+            echo "✅ superinstance/scripts/install_jetson.sh exists"
+            if [ -x "superinstance/scripts/install_jetson.sh" ]; then
+              echo "✅ superinstance/scripts/install_jetson.sh is executable"
+            else
+              echo "⚠️ superinstance/scripts/install_jetson.sh is not executable - fixing..."
+              chmod +x superinstance/scripts/install_jetson.sh
+              echo "✅ Made executable"
+            fi
+          fi
+
+      - name: Validate Makefile targets
+        run: |
+          if [ -f "Makefile" ]; then
+            echo "✅ Makefile exists"
+            # Check for required targets
+            for target in install run benchmark; do
+              if grep -q "^${target}:" Makefile || grep -q "^${target} :" Makefile; then
+                echo "✅ Make target '$target' found"
+              else
+                echo "⚠️ Make target '$target' not found"
+              fi
+            done
+          else
+            echo "❌ FAIL: Makefile not found!"
+            exit 1
+          fi
