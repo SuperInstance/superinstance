@@ -2,24 +2,11 @@
 # =========================
 # IMPORTANT: Set these manually in GitHub Settings → General
 
-## Description (one line)
+## Description (exact - copy this)
 SuperInstance: 4.2 MB single-binary AI Ranch on $499 Jetson. TensorRT-LLM Collie + Dioxus web UI + breed.md abilities. Infinite extensibility, zero bloat, honest benchmarks.
 
-## Topics (add all of these)
-ai
-local-ai
-llm
-lora
-agents
-rust
-tensorrt-llm
-crdt
-jetson
-dioxus
-axum
-modular
-extensible
-single-binary
+## Topics (exact - add all of these)
+ai, local-ai, llm, lora, agents, rust, tensorrt-llm, crdt, jetson, dioxus, axum, modular, extensible, single-binary
 
 ## Homepage URL
 https://superinstance.ai
