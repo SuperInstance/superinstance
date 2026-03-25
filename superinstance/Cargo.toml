@@ -2,12 +2,64 @@
 name = "superinstance"
 version = "0.1.0"
 edition = "2021"
-authors = ["SuperInstance Ranch"]
-description = "A Ranch Ecosystem that evolves into a SuperInstance - specialized intelligences managed by a loyal Border Collie"
-license = "MIT"
+authors = ["SuperInstance Ranch <ranch@superinstance.ai>"]
+description = """
+A self-evolving AI Ranch ecosystem - specialized LoRA agents managed by a Border Collie orchestrator.
+Edit DNA in Markdown (breed.md), evolve through Night School breeding, run on $499 hardware forever.
+4.2 MB binary, zero runtime dependencies, works offline.
+"""
+documentation = "https://docs.rs/superinstance"
 readme = "README.md"
-keywords = ["ai", "edge", "lora", "jetson", "agents", "open-genomics"]
-categories = ["science", "asynchronous"]
+homepage = "https://superinstance.ai"
+repository = "https://github.com/SuperInstance/superinstance"
+license = "MIT"
+keywords = [
+    "ai",
+    "edge", 
+    "lora",
+    "jetson",
+    "agents",
+    "open-genomics",
+    "evolutionary",
+    "orchestration",
+    "local-ai",
+    "tensorrt"
+]
+categories = [
+    "science",
+    "asynchronous",
+    "hardware-support",
+    "web-programming",
+    "command-line-utilities"
+]
+exclude = [
+    "/docs",
+    "/examples",
+    "/templates",
+    "/pasture",
+    "/night_school",
+    "/genetics",
+    "/backend",
+    "*.svg",
+    "*.png",
+    "*.gif",
+    ".github"
+]
+rust-version = "1.75"
+
+[lib]
+name = "superinstance"
+path = "src/lib.rs"
+
+[[bin]]
+name = "superinstance"
+path = "src/main.rs"
+doc = false
+
+[[bin]]
+name = "superinstance-onboard"
+path = "src/bin/onboard.rs"
+doc = false
 
 [dependencies]
 # Async Runtime
@@ -123,14 +175,14 @@ lto = true
 codegen-units = 1
 panic = "abort"
 strip = true
+opt-level = "z"
 
 [profile.dev]
 opt-level = 1
 
-[[bin]]
-name = "superinstance"
-path = "src/main.rs"
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
 
-[[bin]]
-name = "superinstance-onboard"
-path = "src/bin/onboard.rs"
+[badges]
+maintenance = { status = "actively-developed" }

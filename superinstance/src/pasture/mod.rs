@@ -5,12 +5,15 @@
 //! - LoRA adapters (Species personalities)
 //! - KV Cache (Context memory)
 //! - VRAM allocation
+//! - Inference backend (TensorRT/Candle/Mock)
 
 mod lora_manager;
 mod model_pool;
+mod inference;
 
 pub use lora_manager::*;
 pub use model_pool::*;
+pub use inference::*;
 
 use std::sync::Arc;
 
