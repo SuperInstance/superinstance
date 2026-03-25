@@ -464,6 +464,36 @@ make run
 
 **That's it.** Your Ranch is now running. Edit `pasture/cattle/email-cow-v1/breed.md` to customize your first agent.
 
+### 🎯 10 Plug-and-Play Ranches – Copy, Paste, Run
+
+All templates are **pure data** (breed.md + LoRA only) — zero core code changes required. The 4.2 MB binary stays small forever.
+
+| Template | For | One-Line Install |
+|:---------|:----|:-----------------|
+| 🏥 **Healthcare Triage** | Remote nurses, telehealth | `cp templates/healthcare/breed.md pasture/cattle/` |
+| 📚 **Education Assistant** | Teachers, tutors | `cp templates/education/breed.md pasture/cattle/` |
+| ⚖️ **Legal Document Review** | Paralegals, attorneys | `cp templates/legal/breed.md pasture/cattle/` |
+| 💰 **Financial Advisor** | Financial planners | `cp templates/finance/breed.md pasture/cattle/` |
+| 🔬 **Research Assistant** | PhD students, researchers | `cp templates/research/breed.md pasture/cattle/` |
+| 💻 **Developer Copilot** | Remote developers | `cp templates/developer/breed.md pasture/cattle/` |
+| ✍️ **Content Creator** | YouTubers, writers | `cp templates/content/breed.md pasture/cattle/` |
+| 🎧 **Customer Support** | Support agents | `cp templates/support/breed.md pasture/cattle/` |
+| 📊 **Project Manager** | PMs, team leads | `cp templates/project-manager/breed.md pasture/cattle/` |
+| 📰 **Journalist Assistant** | Reporters, freelancers | `cp templates/journalist/breed.md pasture/cattle/` |
+
+**Each template includes:**
+- `breed.md` - Editable DNA (system prompt + gene weights)
+- `config.json` - Species-specific settings
+- `setup.sh` - Optional post-install hooks
+
+```bash
+# Example: Set up a Healthcare Triage agent
+cp templates/healthcare/breed.md pasture/cattle/triage-cow-v1/
+# Edit the breed.md to customize for your workflow
+nano pasture/cattle/triage-cow-v1/breed.md
+# The Collie hot-reloads automatically - no restart needed
+```
+
 ---
 
 ## 🌱 One-Command Install
