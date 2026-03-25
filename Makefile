@@ -48,10 +48,12 @@ run: ## Run the Ranch (TUI + Web)
 ranch: ## Run full dev stack (bun dev + backend proxy)
         @echo "🐄 Starting Ranch dev stack..."
         @echo "  → Frontend: http://localhost:3000 (bun dev)"
-        @echo "  → Backend:  http://localhost:8080 (cargo run)"
+        @echo "  → Backend:  http://localhost:3001 (cargo run)"
+        @echo "  → API:      http://localhost:3001/api/chat"
+        @echo ""
         @trap 'kill 0' INT; \
         bun run dev & \
-        cd backend && cargo run --release & \
+        cd backend && RUST_LOG=info cargo run --release & \
         wait
 
 serve: ## Serve the web dashboard via Axum (port 3000)

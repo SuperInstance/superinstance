@@ -2,6 +2,10 @@
 //! Axum server with breed parsing, LLM chat stub, and UI support
 
 pub mod cattle;
+pub mod night_school;
+pub mod discord;
+pub mod pasture_sync;
+pub mod llama_native;
 
 use axum::{
     extract::{Path, State},
@@ -16,10 +20,12 @@ use std::{
     net::SocketAddr,
     path::PathBuf,
     sync::Arc,
+    env,
 };
 use tokio::sync::Mutex;
 use tracing::{info, error, warn};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use sqlx::SqlitePool;
 
 // ============================================================================
 // Types
@@ -62,6 +68,7 @@ pub struct AppState {
     pub models_dir: PathBuf,
     pub breeds_dir: PathBuf,
     pub llm_loaded: bool,
+    pub db_pool: Option<SqlitePool>,
 }
 
 impl AppState {
@@ -70,7 +77,13 @@ impl AppState {
             models_dir: PathBuf::from("models"),
             breeds_dir: PathBuf::from("breeds"),
             llm_loaded: false,
+            db_pool: None,
         }
+    }
+
+    pub fn with_db(mut self, pool: SqlitePool) -> Self {
+        self.db_pool = Some(pool);
+        self
     }
 
     pub fn model_path(&self) -> PathBuf {
@@ -290,6 +303,48 @@ async fn download_model(model_path: &PathBuf) -> Result<(), String> {
     Ok(())
 }
 
+/// POST /api/sync - Sync pasture via CRDT
+pub async fn sync_pasture(
+    Json(msg): Json<pasture_sync::SyncMessage>,
+) -> Result<Json<pasture_sync::PastureState>, (StatusCode, String)> {
+    info!("Received pasture sync for: {}", msg.pasture_id);
+    
+    let handler = pasture_sync::PastureSyncHandler::new()
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+    
+    handler.handle_sync(msg).await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+    
+    let state = handler.get_state().await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+    
+    Ok(Json(state))
+}
+
+/// POST /api/evolution - Trigger Night School evolution manually
+pub async fn trigger_evolution(
+    State(state): State<Arc<Mutex<AppState>>>,
+) -> Result<Json<night_school::EvolutionResult>, (StatusCode, String)> {
+    info!("Manual evolution trigger");
+    
+    let db_pool = {
+        let s = state.lock().await;
+        s.db_pool.clone()
+    };
+    
+    let pool = db_pool.ok_or((
+        StatusCode::INTERNAL_SERVER_ERROR,
+        "Database not configured".to_string(),
+    ))?;
+    
+    let night_school = night_school::NightSchool::new(pool, PathBuf::from("pasture"));
+    
+    let result = night_school.run_evolution().await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+    
+    Ok(Json(result))
+}
+
 /// GET / - Dashboard stub (Dioxus)
 pub async fn dashboard() -> impl IntoResponse {
     Html(r#"
@@ -341,8 +396,54 @@ async fn main() -> anyhow::Result<()> {
     // Create breeds directory with sample breeds
     create_sample_breeds()?;
     
+    // Initialize database
+    let db_url = env::var("DATABASE_URL").unwrap_or_else(|_| "sqlite:pasture.db".to_string());
+    let db_pool = SqlitePool::connect(&db_url).await?;
+    info!("Database connected: {}", db_url);
+    
     // Initialize app state
-    let state = Arc::new(Mutex::new(AppState::new()));
+    let state = Arc::new(Mutex::new(AppState::new().with_db(db_pool.clone())));
+    
+    // Start Night School cron (if enabled)
+    let night_school_enabled = env::var("NIGHT_SCHOOL_ENABLED")
+        .unwrap_or_else(|_| "false".to_string()) == "true";
+    
+    if night_school_enabled {
+        let night_school = night_school::NightSchool::new(
+            db_pool.clone(),
+            PathBuf::from("pasture"),
+        );
+        
+        tokio::spawn(async move {
+            if let Err(e) = night_school::start_night_school(night_school).await {
+                error!("Night School error: {}", e);
+            }
+        });
+        
+        info!("🌙 Night School enabled - running at 02:00 daily");
+    }
+    
+    // Start Discord bot (if configured)
+    if let Ok(discord_token) = env::var("DISCORD_TOKEN") {
+        let discord_config = discord::DiscordConfig {
+            token: discord_token,
+            channel_id: env::var("DISCORD_CHANNEL_ID")
+                .unwrap_or_else(|_| "0".to_string())
+                .parse()
+                .unwrap_or(0),
+            collie_endpoint: env::var("COLLIE_ENDPOINT")
+                .unwrap_or_else(|_| "http://localhost:3001".to_string()),
+            stream_responses: true,
+        };
+        
+        tokio::spawn(async move {
+            if let Err(e) = discord::start_discord_bot(discord_config).await {
+                error!("Discord bot error: {}", e);
+            }
+        });
+        
+        info!("🐕 Discord bot enabled");
+    }
     
     // Build router
     let app = Router::new()
@@ -352,6 +453,8 @@ async fn main() -> anyhow::Result<()> {
         .route("/api/cattle", post(cattle_chat))
         .route("/api/collie", post(collie_chat))
         .route("/api/chat", post(api_chat))
+        .route("/api/sync", post(sync_pasture))
+        .route("/api/evolution", post(trigger_evolution))
         .with_state(state);
     
     // Start server
