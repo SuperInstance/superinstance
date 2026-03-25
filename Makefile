@@ -3,7 +3,7 @@
 #
 # Usage: make <target>
 
-.PHONY: install run dashboard breed night-school clean test help
+.PHONY: install run ranch dashboard breed night-school clean test help
 
 # Default target
 .DEFAULT_GOAL := help
@@ -44,6 +44,15 @@ install-deps: ## Install system dependencies only
 run: ## Run the Ranch (TUI + Web)
         @echo "🐄 Starting the Ranch..."
         cargo run --release
+
+ranch: ## Run full dev stack (bun dev + backend proxy)
+        @echo "🐄 Starting Ranch dev stack..."
+        @echo "  → Frontend: http://localhost:3000 (bun dev)"
+        @echo "  → Backend:  http://localhost:8080 (cargo run)"
+        @trap 'kill 0' INT; \
+        bun run dev & \
+        cd backend && cargo run --release & \
+        wait
 
 serve: ## Serve the web dashboard via Axum (port 3000)
         @echo "🌐 Starting Axum web server on :3000..."
@@ -154,8 +163,11 @@ clean: ## Clean build artifacts
         rm -rf target/
         rm -rf node_modules/
 
-test: ## Run tests
+test: ## Run all tests (cargo + bun)
+        @echo "🧪 Running Rust tests..."
         cargo test --release
+        @echo "🧪 Running Bun tests..."
+        bun test
 
 test-night-school: ## Run Night School tests only
         @echo "🧪 Running Night School tests..."
