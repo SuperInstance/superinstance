@@ -147,7 +147,7 @@ impl EventHandler for CollieBot {
         }
 
         // Only respond in configured channel or when mentioned
-        let should_respond = msg.channel_id.0 == self.config.channel_id
+        let should_respond = msg.channel_id == self.config.channel_id
             || msg.mentions.iter().any(|u| u.bot);
 
         if !should_respond {

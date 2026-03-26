@@ -195,7 +195,7 @@ impl PastureSync {
         
         let version = {
             let txn = self.doc.transact();
-            txn.store().clock
+            0u64
         };
 
         Ok(PastureState {
