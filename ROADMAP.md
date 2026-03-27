@@ -29,7 +29,7 @@ If any answer is "no", reconsider the change.
 - [x] Library interface for crates.io
 
 ### 🔄 In Progress
-- [ ] v0.2.0 GitHub Release
+- [x] v0.2.0 GitHub Release
 - [ ] 60-second demo video
 - [ ] HN launch preparation
 
