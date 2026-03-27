@@ -197,7 +197,7 @@ benchmark: ## Run performance benchmarks
 	@echo "  Output Length: 128 tokens"
 	@echo ""
 	@echo "┌─────────────────────────────────────────────────────────────┐"
-	@echo "│  VERIFIED BENCHMARKS (run 'make benchmark' on your Jetson) │"
+	@echo "│  REFERENCE NUMBERS (run on your own hardware to measure)   │"
 	@echo "├─────────────────────────────────────────────────────────────┤"
 	@echo "│  Orin Nano 8GB (community reports):                        │"
 	@echo "│    • Tokens/sec: 10-15 (honest range)                      │"

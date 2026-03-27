@@ -50,7 +50,7 @@ make cull               # Prune weak breeds
 
 ### Repository Structure
 
-- **`superinstance/`** — Main Rust binary (single binary, <5 MB constraint with LTO + strip)
+- **`superinstance/`** — Main Rust binary (single binary, <5 MB constraint with LTO + strip; requires Rust 1.85+)
 - **`backend/`** — Heavy integrations: TensorRT, CRDT (yrs/Yjs), llama.cpp FFI
 - **`src/`** — Next.js 16 frontend (TypeScript, React 19, TailwindCSS 4, Prisma/SQLite)
 - **`pasture/`** — User-editable breed definitions (Markdown); hot-reloaded via `notify`

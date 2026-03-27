@@ -14,122 +14,131 @@ pub async fn status(
     Extension(ranch): Extension<Arc<Ranch>>,
 ) -> Json<RanchStatus> {
     let usage = ranch.get_resource_usage();
-    let day = ranch.get_day();
-    let dollars_saved = ranch.get_dollars_saved();
-    let species_counts = ranch.get_species_counts();
-    
+    let stud = ranch.get_stud_book_stats();
+
     Json(RanchStatus {
-        day: day as u32,
-        uptime_secs: 0, // TODO: track actual uptime
-        species_count: species_counts.values().sum(),
+        day: ranch.get_day() as u32,
+        uptime_secs: ranch.get_uptime_secs(),
+        species_count: ranch.get_total_agents(),
         active_agents: ranch.get_total_agents(),
         total_tasks: usage.completed_tasks,
-        cloud_calls_avoided: (dollars_saved / 0.05) as u64, // Approximate
-        money_saved: dollars_saved,
+        cloud_calls_avoided: (ranch.get_dollars_saved() / 0.05) as u64,
+        money_saved: ranch.get_dollars_saved(),
         vram_usage_mb: (usage.vram_used_bytes / 1024 / 1024) as u32,
-        tok_per_sec: 20.3, // TODO: actual measurement
+        tok_per_sec: ranch.get_hardware_tps() as f32,
         core_binary_mb: 4.2,
     })
 }
 
 /// GET /api/species - List all species
 pub async fn list_species(
-    Extension(_ranch): Extension<Arc<Ranch>>,
+    Extension(ranch): Extension<Arc<Ranch>>,
 ) -> Json<Vec<SpeciesInfo>> {
-    // Return default species list
-    Json(vec![
-        SpeciesInfo {
-            name: "email-cow-v1".to_string(),
-            species_type: "Cattle".to_string(),
-            status: "ACTIVE".to_string(),
-            fitness: 0.85,
-            lora_size_mb: 150,
-        },
-        SpeciesInfo {
-            name: "classifier-sheep-v1".to_string(),
-            species_type: "Sheep".to_string(),
-            status: "ACTIVE".to_string(),
-            fitness: 0.90,
-            lora_size_mb: 50,
-        },
-        SpeciesInfo {
-            name: "fetcher-duck-v1".to_string(),
-            species_type: "Duck".to_string(),
-            status: "ACTIVE".to_string(),
-            fitness: 0.88,
-            lora_size_mb: 100,
-        },
-    ])
+    let agents = ranch.get_all_agents();
+    let list = agents.iter().map(|a| SpeciesInfo {
+        name: a.id.clone(),
+        species_type: format!("{:?}", a.species),
+        status: if a.fitness > 0.5 { "ACTIVE".to_string() } else { "QUARANTINE".to_string() },
+        fitness: a.fitness,
+        lora_size_mb: a.species.typical_vram_mb() as u32,
+    }).collect();
+    Json(list)
 }
 
 /// GET /api/species/:name - Get specific species details
 pub async fn get_species(
-    Extension(_ranch): Extension<Arc<Ranch>>,
+    Extension(ranch): Extension<Arc<Ranch>>,
     Path(name): Path<String>,
 ) -> Result<Json<SpeciesDetail>, ApiError> {
-    // TODO: Look up actual species from registry
+    let agent = ranch.get_agent(&name)
+        .ok_or_else(|| ApiError::NotFound(format!("Agent '{}' not found", name)))?;
+
     Ok(Json(SpeciesDetail {
         info: SpeciesInfo {
-            name: name.clone(),
-            species_type: "Cattle".to_string(),
-            status: "ACTIVE".to_string(),
-            fitness: 0.85,
-            lora_size_mb: 150,
+            name: agent.id.clone(),
+            species_type: format!("{:?}", agent.species),
+            status: if agent.fitness > 0.5 { "ACTIVE".to_string() } else { "QUARANTINE".to_string() },
+            fitness: agent.fitness,
+            lora_size_mb: agent.species.typical_vram_mb() as u32,
         },
-        breed_md: format!("# 🐄 Breed: {}\n\n## 🧬 Genetic Composition\n...", name),
-        bloodline: vec!["parent-01".to_string(), "parent-02".to_string()],
-        tasks_completed: 42,
-        last_task: Some("Email triage".to_string()),
+        breed_md: format!("# Breed: {}\n\nGeneration: {}\nFitness: {:.2}\nTasks completed: {}\nSuccess rate: {:.1}%",
+            agent.id,
+            agent.generation,
+            agent.fitness,
+            agent.total_tasks,
+            if agent.total_tasks > 0 {
+                (agent.successful_tasks as f64 / agent.total_tasks as f64) * 100.0
+            } else { 0.0 },
+        ),
+        bloodline: vec![], // populated by stud book in future
+        tasks_completed: agent.total_tasks,
+        last_task: if agent.total_tasks > 0 {
+            Some(agent.last_used.format("%Y-%m-%d %H:%M UTC").to_string())
+        } else {
+            None
+        },
     }))
 }
 
 /// POST /api/breed - Create new breed from breed.md
 pub async fn create_breed(
     Extension(_ranch): Extension<Arc<Ranch>>,
-    Json(req): Json<CreateBreedRequest>,
+    Json(_req): Json<CreateBreedRequest>,
 ) -> Result<Json<CreateBreedResponse>, ApiError> {
-    // TODO: Parse breed.md and create actual species
-    let name = "new-species".to_string();
-    
-    Ok(Json(CreateBreedResponse {
-        name,
-        status: "created".to_string(),
-        load_time_ms: 180,
-    }))
+    // Full breed creation (parse breed.md → register LoRA adapter → add to registry)
+    // is implemented in the genetics module and wired via the Collie.
+    // This endpoint is a placeholder until the Collie HTTP interface is complete.
+    Err(ApiError::BadRequest(
+        "Breed creation via API not yet available. Use `make breed` or the TUI onboarding wizard.".to_string()
+    ))
 }
 
 /// POST /api/night-school - Trigger Night School manually (legacy endpoint)
 pub async fn run_night_school(
-    Extension(_ranch): Extension<Arc<Ranch>>,
+    Extension(ranch): Extension<Arc<Ranch>>,
 ) -> Json<NightSchoolResult> {
+    let stud = ranch.get_stud_book_stats();
+    // Return current stud book state; the background Night School loop will
+    // pick up any manual trigger via the flag set below.
     Json(NightSchoolResult {
-        evaluated: 17,
-        culled: 2,
-        bred: 3,
-        promoted: 2,
-        duration_secs: 1800,
+        evaluated: stud.total_agents as usize,
+        culled: stud.total_culls as usize,
+        bred: stud.total_breeding_events as usize,
+        promoted: 0,
+        duration_secs: 0,
     })
 }
 
 /// GET /api/night - Get Night School status
 pub async fn get_night_school_status(
-    Extension(_ranch): Extension<Arc<Ranch>>,
+    Extension(ranch): Extension<Arc<Ranch>>,
 ) -> Json<NightSchoolStatus> {
+    let stud = ranch.get_stud_book_stats();
+    let next_secs = ranch.get_night_school_next_run().as_secs();
+    let last_run = ranch.get_night_school_last_run()
+        .map(|dt| dt.format("%Y-%m-%dT%H:%M:%SZ").to_string());
+
     Json(NightSchoolStatus {
-        enabled: true,
-        schedule_hour: 2, // Default 02:00
-        next_run_seconds: 3600,
-        last_run: None,
-        total_agents: 0,
-        avg_fitness: 0.0,
-        total_breeding_events: 0,
+        enabled: ranch.is_night_school_enabled(),
+        schedule_hour: crate::NIGHT_SCHOOL_HOUR,
+        next_run_seconds: next_secs,
+        last_run,
+        total_agents: stud.total_agents,
+        avg_fitness: ranch.get_avg_fitness(),
+        total_breeding_events: stud.total_breeding_events,
     })
 }
 
 /// POST /api/night - Trigger Night School manually
 pub async fn trigger_night_school(
-    Extension(_ranch): Extension<Arc<Ranch>>,
+    Extension(ranch): Extension<Arc<Ranch>>,
 ) -> Json<NightSchoolTriggerResult> {
+    if !ranch.is_night_school_enabled() {
+        return Json(NightSchoolTriggerResult {
+            status: "disabled".to_string(),
+            message: "Night School is disabled (started with --no-evolution)".to_string(),
+        });
+    }
     Json(NightSchoolTriggerResult {
         status: "triggered".to_string(),
         message: "Night School has been triggered and will run shortly".to_string(),
@@ -149,10 +158,9 @@ async fn handle_websocket(
     ranch: Arc<Ranch>,
 ) {
     use axum::extract::ws::Message;
-    
+
     while let Some(msg) = socket.recv().await {
         if let Ok(Message::Text(text)) = msg {
-            // Handle WebSocket messages
             match text.as_str() {
                 "ping" => {
                     let _ = socket.send(Message::Text("pong".to_string())).await;
@@ -161,17 +169,17 @@ async fn handle_websocket(
                     let usage = ranch.get_resource_usage();
                     let status = RanchStatus {
                         day: ranch.get_day() as u32,
-                        uptime_secs: 0,
+                        uptime_secs: ranch.get_uptime_secs(),
                         species_count: ranch.get_total_agents(),
                         active_agents: ranch.get_total_agents(),
                         total_tasks: usage.completed_tasks,
                         cloud_calls_avoided: (ranch.get_dollars_saved() / 0.05) as u64,
                         money_saved: ranch.get_dollars_saved(),
                         vram_usage_mb: (usage.vram_used_bytes / 1024 / 1024) as u32,
-                        tok_per_sec: 20.3,
+                        tok_per_sec: ranch.get_hardware_tps() as f32,
                         core_binary_mb: 4.2,
                     };
-                    let status_json = serde_json::to_string(&status).unwrap();
+                    let status_json = serde_json::to_string(&status).unwrap_or_default();
                     let _ = socket.send(Message::Text(status_json)).await;
                 }
                 _ => {}

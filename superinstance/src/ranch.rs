@@ -16,9 +16,9 @@ use tokio::time::sleep;
 use tracing::{debug, info, warn};
 
 use crate::collie::Collie;
-use crate::evolution::{NightSchool, StudBook};
-use crate::pasture::{LoRAManager, ModelPool, Pasture};
-use crate::species::{Species, SpeciesType, SpeciesRegistry};
+use crate::evolution::{NightSchool, StudBook, StudBookStats};
+use crate::pasture::{HardwareTier, LoRAManager, ModelPool, Pasture};
+use crate::species::{ActiveAgent, Species, SpeciesType, SpeciesRegistry};
 use crate::{Config, NIGHT_SCHOOL_HOUR};
 
 /// The Ranch - the top-level container for the entire ecosystem
@@ -39,6 +39,12 @@ pub struct Ranch {
     resource_usage: Arc<RwLock<ResourceUsage>>,
     /// Economic counter - dollars saved by using local vs cloud
     dollars_saved: Arc<RwLock<f64>>,
+    /// Time the ranch was started (for uptime calculation)
+    startup_time: Instant,
+    /// Expected tokens/sec for detected hardware tier
+    hardware_tps: f64,
+    /// Timestamp of last completed Night School run
+    night_school_last_run: Arc<RwLock<Option<chrono::DateTime<chrono::Utc>>>>,
 }
 
 /// Resource usage tracking
@@ -88,7 +94,9 @@ impl Ranch {
             vram_max_bytes: config.max_vram_bytes,
             ..Default::default()
         }));
-        
+
+        let hardware_tps = HardwareTier::detect().expected_tps();
+
         Ok(Self {
             config,
             collie,
@@ -98,6 +106,9 @@ impl Ranch {
             day_counter: Arc::new(RwLock::new(1)),
             resource_usage,
             dollars_saved: Arc::new(RwLock::new(0.0)),
+            startup_time: Instant::now(),
+            hardware_tps,
+            night_school_last_run: Arc::new(RwLock::new(None)),
         })
     }
     
@@ -135,6 +146,49 @@ impl Ranch {
         registry.total_active()
     }
     
+    /// Uptime in seconds since the Ranch was started
+    pub fn get_uptime_secs(&self) -> u64 {
+        self.startup_time.elapsed().as_secs()
+    }
+
+    /// Expected tok/s for the detected hardware tier
+    pub fn get_hardware_tps(&self) -> f64 {
+        self.hardware_tps
+    }
+
+    /// Snapshot of all active agents, ranked by fitness
+    pub fn get_all_agents(&self) -> Vec<ActiveAgent> {
+        self.species_registry.read().get_ranked()
+            .into_iter()
+            .cloned()
+            .collect()
+    }
+
+    /// Look up a single active agent by id
+    pub fn get_agent(&self, id: &str) -> Option<ActiveAgent> {
+        self.species_registry.read().get(id).cloned()
+    }
+
+    /// Average fitness across all registered agents (0.0 if none)
+    pub fn get_avg_fitness(&self) -> f32 {
+        let agents = self.species_registry.read();
+        let ranked = agents.get_ranked();
+        if ranked.is_empty() {
+            return 0.0;
+        }
+        ranked.iter().map(|a| a.fitness).sum::<f32>() / ranked.len() as f32
+    }
+
+    /// Timestamp of the last completed Night School run
+    pub fn get_night_school_last_run(&self) -> Option<chrono::DateTime<chrono::Utc>> {
+        *self.night_school_last_run.read()
+    }
+
+    /// Stud Book aggregate statistics
+    pub fn get_stud_book_stats(&self) -> StudBookStats {
+        self.stud_book.lock().get_stats().unwrap_or_default()
+    }
+
     /// Run the Night School breeding cycle
     pub async fn run_night_school(&self) -> Result<()> {
         if !self.config.night_school_enabled {
@@ -208,6 +262,7 @@ impl Ranch {
                     info!("  Culled: {} underperformers", report.culled_count);
                     info!("  Bred: {} new offspring", report.bred_count);
                     info!("  Promoted: {} to production", report.promoted_count);
+                    *self.night_school_last_run.write() = Some(chrono::Utc::now());
                 }
                 Err(e) => {
                     warn!("Night School error: {}", e);

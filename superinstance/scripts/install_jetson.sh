@@ -340,10 +340,15 @@ setup_environment() {
     fi
 }
 
-# Create Makefile
+# Create Makefile (only when one does not already exist)
 create_makefile() {
+    if [ -f "Makefile" ]; then
+        print_success "Makefile already exists — skipping (existing Makefile preserved)"
+        return 0
+    fi
+
     print_step "📝 Creating Makefile..."
-    
+
     cat > Makefile << 'EOF'
 # SuperInstance Ranch Makefile
 # Usage: make <target>

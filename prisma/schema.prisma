@@ -1,8 +1,7 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// SuperInstance Prisma Schema
+// Web dashboard database (SQLite via Prisma)
+// Note: the Rust binary manages its own SQLite (stud_book.sqlite) via rusqlite directly.
+// This schema is for the Next.js dashboard: user sessions, settings, and UI state.
 
 generator client {
   provider = "prisma-client-js"
@@ -13,20 +12,96 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ============================================================
+// Authentication
+// ============================================================
+
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
+  id        String    @id @default(cuid())
+  email     String    @unique
   name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role      String    @default("owner") // owner | viewer
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  sessions  Session[]
+  settings  UserSettings?
 }
 
-model Post {
+model Session {
   id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================
+// Ranch Configuration (editable from the dashboard)
+// ============================================================
+
+model RanchSettings {
+  id               String  @id @default(cuid())
+  maxVramGb        Float   @default(6.0)
+  nightSchoolHour  Int     @default(2)    // 0-23 (24h)
+  cullThreshold    Float   @default(0.4)  // 0.0-1.0
+  baseModel        String  @default("phi-3-mini")
+  nightSchoolEnabled Boolean @default(true)
+  bunkerMode       Boolean @default(false)
+  updatedAt        DateTime @updatedAt
+}
+
+model UserSettings {
+  id            String  @id @default(cuid())
+  userId        String  @unique
+  theme         String  @default("dark")  // dark | light | system
+  dashboardLayout String @default("default")
+  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================
+// Breed Definitions (mirrors pasture/ directory for dashboard editing)
+// ============================================================
+
+model BreedDefinition {
+  id          String   @id @default(cuid())
+  name        String   @unique   // e.g. "email-cow-v1"
+  speciesType String              // Cattle | Sheep | Duck | Goat | Hog | Chicken | Horse
+  breedMd     String             // Full breed.md content
+  filePath    String             // Relative path in pasture/
+  isTemplate  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ============================================================
+// Night School Run History (populated by the Rust binary via SQLite export)
+// ============================================================
+
+model NightSchoolRun {
+  id              String   @id @default(cuid())
+  ranAt           DateTime
+  dayNumber       Int
+  agentsEvaluated Int
+  agentsCulled    Int
+  agentsBred      Int
+  agentsPromoted  Int
+  durationSecs    Int
+  avgFitnessBefore Float
+  avgFitnessAfter  Float
+  createdAt       DateTime @default(now())
+}
+
+// ============================================================
+// Channel Connector Configuration
+// ============================================================
+
+model ChannelConfig {
+  id          String  @id @default(cuid())
+  name        String  @unique   // e.g. "discord-main"
+  channelType String             // Discord | Telegram | Slack | Webhook
+  enabled     Boolean @default(false)
+  config      String             // JSON blob of channel-specific settings
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

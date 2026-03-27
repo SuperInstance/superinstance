@@ -40,7 +40,7 @@ exclude = [
     "*.gif",
     ".github"
 ]
-rust-version = "1.75"
+rust-version = "1.85"
 
 [lib]
 name = "superinstance"

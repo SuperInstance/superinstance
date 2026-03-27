@@ -25,7 +25,7 @@ SuperInstance is in **Early Development (Alpha)**. The architecture is solid, bu
 
 ### Prerequisites
 
-- Rust 1.75+ (use `rustup`)
+- Rust 1.85+ (use `rustup update stable`)
 - A CUDA-capable device (Jetson Orin Nano recommended, or any NVIDIA GPU)
 - Git
 
